@@ -6,7 +6,7 @@ load_dotenv()
 
 client = anthropic.Anthropic()
 
-def generate_secret_word(category: str, used_words: list[str]) -> str:
+def generate_secret_word(category: str, count:int, used_words: list[str]) -> list[str]:
     exclude = ""
     if used_words:
         exclude = f" Do not use these words: {', '.join(used_words)}."
@@ -18,14 +18,14 @@ def generate_secret_word(category: str, used_words: list[str]) -> str:
         messages=[
             {
                 "role": "user",
-                "content": f"Give me 5 words related to the category '{category}' that would work for a word-guessing game. The words should be specific enough to hint at but not too obvious.{exclude} Return only the words, one per line, nothing else."
+                "content": f"Give me {count} words related to the category '{category}' that would work for a word-guessing game. The words should be specific enough to hint at but not too obvious.{exclude} Return only the words, one per line, nothing else."
             }
         ]
     )
     
     words = message.content[0].text.strip().split("\n")
-    return random.choice(words)
+    return words
 
 if __name__ == "__main__":
-    word = generate_secret_word("Ramadan")
+    word = generate_secret_word("Ramadan", 6, [])
     print(word)

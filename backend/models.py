@@ -26,20 +26,28 @@ class Player ():
     def toggle_ready_to_vote (self):
         self.ready_to_vote  = not self.ready_to_vote
 
-
-
+class SecretWordSession ():
+    def __init__(self, ListOfPlayers: list[Player], secretWord:str, currentImpostor:Player):
+        self.playOrder = ListOfPlayers.copy()
+        random.shuffle(self.playOrder)
+        self.secretWord = secretWord
+        self.currentRound = 0
+        self.currentImpostor = currentImpostor
+    
 class GamePlay ():
     def __init__(self, gameID, hostID, maxRound, clueTimer,secretCategory):
         self.gameID = gameID
         self.hostID = hostID
         self.maxRound = maxRound
         self.clueTimer = clueTimer
-        self.secretCategory = secretCategory
+        self.secretCategory:str = secretCategory
         self.roundTimer = 0
         self.phase = GamePhase.LOBBY
-        self.loPlayers = []
+        self.loPlayers : list[Player] = []
+        self.impostorSchedule: list[Player] = []
         self.wordsAvailable = []
         self.wordsUsed = []
+        self.currentSession :SecretWordSession = None
         
     
     def changeCategory (self, descriptionNew: str):
@@ -48,7 +56,7 @@ class GamePlay ():
     def changeClueTimer (self, clueTimeNew):
         self.clueTimer = clueTimeNew
 
-    def addNewPlayer (self, playerNew):
+    def addNewPlayer (self, playerNew : Player):
         self.loPlayers.append(playerNew)
     
     def removePlayer(self, playerRemove):
@@ -93,44 +101,6 @@ class GamePlay ():
         self.wordsUsed.append(currWord)
         return currWord
 
-
-
     def updateUsedWords(self, usedWords):
         self.wordsUsed.extend(usedWords)
-
-        
-        
-
-class SecretWordSession ():
-    def __init__(self, ListOfPlayers):
-        self.playOrder = ListOfPlayers
-        self.secretWord = ""
-        self.currentRound = 0
-        self.currentClueGiver = 0
-    
-    def createRoundOrder(players):
-        order = players.copy()
-        random.shuffle(order)
-        return order
-    
-    def selectImpostor(players, maxRounds):
-        totalPlayers = len(players)
-        lofImposters = players.copy()
-        extras = maxRounds - totalPlayers
-        if extras > totalPlayers:
-            playersToAdd = random.choices(players, k=extras)
-            lofImposters.extend(playersToAdd)
-            random.shuffle(lofImposters)
-            return lofImposters
-
-        elif totalPlayers < maxRounds:
-            #this code is ensure everyone has a chance to play, but its not predictable, so some people are added twice 
-            playersToAdd = random.sample(players,extras)
-            lofImposters.extend(playersToAdd)
-            random.shuffle(lofImposters)
-            return lofImposters
-
-        else:
-            return random.sample(lofImposters,maxRounds)
-
 
