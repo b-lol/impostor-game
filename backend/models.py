@@ -24,6 +24,8 @@ class Player ():
         self.ready_to_vote = False
         #reset after ever sws
         self.points = 0
+        self.has_voted = False
+        self.voted_for_id = None
 
     def toggle_ready_to_start(self):
         self.ready_to_start = not self.ready_to_start
