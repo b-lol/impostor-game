@@ -19,10 +19,15 @@ class Player ():
         #reset every SWS
         self.votes = 0
         #reset every SWS
+        self.ready_to_start = False
+            
         self.ready_to_vote = False
         #reset after ever sws
         self.points = 0
-    
+
+    def toggle_ready_to_start(self):
+        self.ready_to_start = not self.ready_to_start
+
     def toggle_ready_to_vote (self):
         self.ready_to_vote  = not self.ready_to_vote
 
@@ -31,7 +36,7 @@ class SecretWordSession ():
         self.playOrder = ListOfPlayers.copy()
         random.shuffle(self.playOrder)
         self.secretWord = secretWord
-        self.currentRound = 0
+        self.currentTurnIndex = 0
         self.currentImpostor = currentImpostor
     
 class GamePlay ():

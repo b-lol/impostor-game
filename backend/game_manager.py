@@ -8,11 +8,14 @@ active_players = {}
 
 def create_game(host_id, max_round, clue_timer, secret_category):
     game_id = generate_game_id()
-    
     game = GamePlay(game_id, host_id, max_round, clue_timer, secret_category)
     
-    active_games[game_id] = game
+    # Auto-add host to the game
+    host = active_players.get(host_id)
+    if host:
+        game.addNewPlayer(host)
     
+    active_games[game_id] = game
     return game_id
 
 def register_player(name : str) -> str:
@@ -21,17 +24,21 @@ def register_player(name : str) -> str:
      active_players[player_id] = player
      return player_id
 
-def generate_game_id()-> str:
+def generate_game_id() -> str:
+    # Exclude ambiguous characters: 0, O, 1, I, L
+    safe_chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
     while True:
-        game_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+        game_id = ''.join(random.choices(safe_chars, k=6))
         if game_id not in active_games:
             return game_id
 
 def generate_player_id():
-        while True:
-            player_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
-            if player_id not in active_players:
-                return player_id
+    # Exclude ambiguous characters: 0, O, 1, I, L
+    safe_chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
+    while True:
+        player_id = ''.join(random.choices(safe_chars, k=6))
+        if player_id not in active_players:
+            return player_id
 
 def join_game(player_id : str, game_id:str):
     try:
