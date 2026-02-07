@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class ApiService {
   // Change this to your server's IP if testing on a real phone
-  static const String baseUrl = 'https://impostor-game-production-b1a9.up.railway.app';;
+  static const String baseUrl = 'https://impostor-game-production-b1a9.up.railway.app';
 
   // Register a new player
   Future<String?> registerPlayer(String name) async {
