@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class WebSocketService {
-  static const String baseUrl = 'ws://127.0.0.1:8000';
+  static const String baseUrl = 'wss://impostor-game-production-b1a9.up.railway.app'; 
   
   WebSocketChannel? _channel;
   Function(Map<String, dynamic>)? onMessageReceived;
