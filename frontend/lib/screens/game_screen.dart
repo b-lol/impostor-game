@@ -277,7 +277,10 @@ class _GameScreenState extends State<GameScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Game: ${widget.gameId}'),
+        title: Text(
+          'Game: ${widget.gameId}',
+          style: const TextStyle(color: Color(0xFF08C8E9)),
+        ),
         automaticallyImplyLeading: false,
       ),
       body: _buildBody(),
@@ -313,7 +316,7 @@ class _GameScreenState extends State<GameScreen> {
         children: [
           const Text(
             'Your Role',
-            style: TextStyle(fontSize: 24, color: Colors.grey),
+            style: TextStyle(fontSize: 22, color: Color(0xFFB0B0B0)),
           ),
           const SizedBox(height: 24),
           
@@ -325,9 +328,15 @@ class _GameScreenState extends State<GameScreen> {
               padding: const EdgeInsets.all(32),
               decoration: BoxDecoration(
                 color: _showRole 
-                    ? (_session!.isImpostor ? Colors.red.shade100 : Colors.green.shade100)
-                    : Colors.grey.shade300,
+                    ? (_session!.isImpostor ? const Color(0xFFFF5252).withOpacity(0.2) : const Color(0xFF08C8E9).withOpacity(0.2))
+                    : const Color(0xFF2A2A3E),
                 borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: _showRole
+                      ? (_session!.isImpostor ? const Color(0xFFFF5252) : const Color(0xFF08C8E9))
+                      : const Color(0xFFB0B0B0),
+                  width: 2,
+                ),
               ),
               child: Column(
                 children: [
@@ -337,7 +346,7 @@ class _GameScreenState extends State<GameScreen> {
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
-                        color: _session!.isImpostor ? Colors.red : Colors.green,
+                        color: _session!.isImpostor ? const Color(0xFFFF5252) : const Color(0xFF08C8E9),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -345,7 +354,7 @@ class _GameScreenState extends State<GameScreen> {
                       _session!.isImpostor 
                           ? 'Blend in! Don\'t get caught!' 
                           : 'Secret Word:',
-                      style: const TextStyle(fontSize: 18),
+                      style: const TextStyle(fontSize: 18, color: Color(0xFFB0B0B0)),
                     ),
                     if (!_session!.isImpostor) ...[
                       const SizedBox(height: 8),
@@ -354,13 +363,14 @@ class _GameScreenState extends State<GameScreen> {
                         style: const TextStyle(
                           fontSize: 36,
                           fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
                       ),
                     ],
                   ] else ...[
                     const Text(
                       '👆 Hold to reveal',
-                      style: TextStyle(fontSize: 24, color: Colors.grey),
+                      style: TextStyle(fontSize: 24, color: Color(0xFFB0B0B0)),
                     ),
                   ],
                 ],
@@ -371,18 +381,19 @@ class _GameScreenState extends State<GameScreen> {
           const SizedBox(height: 32),
           Text(
             'Ready: $_readyCount / $_totalPlayers',
-            style: const TextStyle(fontSize: 18),
+            style: const TextStyle(fontSize: 18, color: Color(0xFFB0B0B0)),
           ),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: _toggleReadyStart,
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-              backgroundColor: _isReady ? Colors.green : null,
-            ),
+            style: _isReady 
+                ? ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF08C8E9).withOpacity(0.3),
+                    side: const BorderSide(color: Color(0xFF08C8E9), width: 2),
+                  )
+                : null,
             child: Text(
               _isReady ? 'Ready ✓' : 'I\'m Ready',
-              style: const TextStyle(fontSize: 18),
             ),
           ),
         ],
@@ -402,15 +413,25 @@ class _GameScreenState extends State<GameScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: _timeRemaining <= 5 ? Colors.red.shade100 : Colors.blue.shade50,
+              color: _timeRemaining <= 5 
+                  ? const Color(0xFFFF5252).withOpacity(0.2) 
+                  : const Color(0xFF08C8E9).withOpacity(0.2),
               shape: BoxShape.circle,
+              border: Border.all(
+                color: _timeRemaining <= 5 
+                    ? const Color(0xFFFF5252) 
+                    : const Color(0xFF08C8E9),
+                width: 2,
+              ),
             ),
             child: Text(
               '$_timeRemaining',
               style: TextStyle(
                 fontSize: 48,
                 fontWeight: FontWeight.bold,
-                color: _timeRemaining <= 5 ? Colors.red : Colors.blue,
+                color: _timeRemaining <= 5 
+                    ? const Color(0xFFFF5252) 
+                    : const Color(0xFF08C8E9),
               ),
             ),
           ),
@@ -420,7 +441,7 @@ class _GameScreenState extends State<GameScreen> {
             isMyTurn ? 'YOUR TURN!' : 'Current Turn:',
             style: TextStyle(
               fontSize: 20,
-              color: isMyTurn ? Colors.orange : Colors.grey,
+              color: isMyTurn ? const Color(0xFF08C8E9) : const Color(0xFFB0B0B0),
             ),
           ),
           const SizedBox(height: 8),
@@ -429,6 +450,7 @@ class _GameScreenState extends State<GameScreen> {
             style: const TextStyle(
               fontSize: 36,
               fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
           ),
           const SizedBox(height: 48),
@@ -436,37 +458,36 @@ class _GameScreenState extends State<GameScreen> {
           if (isMyTurn) ...[
             const Text(
               'Give a one-word clue!',
-              style: TextStyle(fontSize: 18),
+              style: TextStyle(fontSize: 18, color: Color(0xFFB0B0B0)),
             ),
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: _endTurn,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 48),
-              ),
-              child: const Text('Done', style: TextStyle(fontSize: 20)),
+              child: const Text('Done'),
             ),
           ] else ...[
             const Text(
               'Listen to the clue...',
-              style: TextStyle(fontSize: 18, color: Colors.grey),
+              style: TextStyle(fontSize: 18, color: Color(0xFFB0B0B0)),
             ),
           ],
 
           const SizedBox(height: 48),
-          const Divider(),
+          Divider(color: const Color(0xFFB0B0B0).withOpacity(0.3)),
           const SizedBox(height: 16),
 
           Text(
             'Ready to vote: $_readyCount / $_totalPlayers',
-            style: const TextStyle(fontSize: 16),
+            style: const TextStyle(fontSize: 16, color: Color(0xFFB0B0B0)),
           ),
           const SizedBox(height: 12),
           OutlinedButton(
             onPressed: _toggleReadyToVote,
-            style: OutlinedButton.styleFrom(
-              backgroundColor: _isReady ? Colors.green.shade100 : null,
-            ),
+            style: _isReady
+                ? OutlinedButton.styleFrom(
+                    backgroundColor: const Color(0xFF08C8E9).withOpacity(0.3),
+                  )
+                : null,
             child: Text(_isReady ? 'Ready to Vote ✓' : 'Ready to Vote'),
           ),
         ],
@@ -475,127 +496,153 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   Widget _buildVotingPhase() {
-    final canSubmit = _readyCount == _totalPlayers && _hasMajority();
-    
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Text(
-            '🗳️ VOTING TIME',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Votes in: $_readyCount / $_totalPlayers',
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 16, color: Colors.grey),
-          ),
-          if (!_hasMajority() && _voteTally.isNotEmpty)
+      final canSubmit = _readyCount == _totalPlayers && _hasMajority();
+      
+      return Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
             const Text(
-              '⚠️ Need a majority to submit!',
+              '🗳️ VOTING TIME',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: Colors.orange),
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF08C8E9),
+              ),
             ),
-          const SizedBox(height: 24),
+            const SizedBox(height: 8),
+            Text(
+              'Votes in: $_readyCount / $_totalPlayers',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16, color: Color(0xFFB0B0B0)),
+            ),
+            if (!_hasMajority() && _voteTally.isNotEmpty)
+              const Text(
+                '⚠️ Need a majority to submit!',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 14, color: Color(0xFFFF5252)),
+              ),
+            const SizedBox(height: 24),
 
-          Expanded(
-            child: ListView.builder(
-              itemCount: _voteTally.isEmpty 
-                  ? _session?.turnOrder.length ?? 0 
-                  : _voteTally.length,
-              itemBuilder: (context, index) {
-                final player = _voteTally.isEmpty
-                    ? _session!.turnOrder[index]
-                    : null;
-                
-                final id = _voteTally.isEmpty 
-                    ? player!.id 
-                    : _voteTally[index]['id'];
-                final name = _voteTally.isEmpty 
-                    ? player!.name 
-                    : _voteTally[index]['name'];
-                final votes = _voteTally.isEmpty 
-                    ? 0 
-                    : _voteTally[index]['votes'];
-                
-                final isMe = id == widget.playerId;
-                final isMyVote = id == _myVoteId;
+            Expanded(
+              child: ListView.builder(
+                itemCount: _voteTally.isEmpty 
+                    ? _session?.turnOrder.length ?? 0 
+                    : _voteTally.length,
+                itemBuilder: (context, index) {
+                  final player = _voteTally.isEmpty
+                      ? _session!.turnOrder[index]
+                      : null;
+                  
+                  final id = _voteTally.isEmpty 
+                      ? player!.id 
+                      : _voteTally[index]['id'];
+                  final name = _voteTally.isEmpty 
+                      ? player!.name 
+                      : _voteTally[index]['name'];
+                  final votes = _voteTally.isEmpty 
+                      ? 0 
+                      : _voteTally[index]['votes'];
+                  
+                  final isMe = id == widget.playerId;
+                  final isMyVote = id == _myVoteId;
 
-                return Card(
-                  color: isMyVote ? Colors.blue.shade50 : null,
-                  child: ListTile(
-                    leading: const Icon(Icons.person),
-                    title: Text(name),
-                    subtitle: isMe ? const Text('(You)') : null,
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade200,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            '$votes',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        if (!isMe)
-                          ElevatedButton(
-                            onPressed: () => _submitVote(id),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: isMyVote ? Colors.blue : null,
-                            ),
-                            child: Text(isMyVote ? 'Voted' : 'Vote'),
-                          ),
-                      ],
+                  return Card(
+                    color: isMyVote 
+                        ? const Color(0xFF08C8E9).withOpacity(0.15) 
+                        : const Color(0xFF2A2A3E),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: isMyVote 
+                          ? const BorderSide(color: Color(0xFF08C8E9), width: 1) 
+                          : BorderSide.none,
                     ),
-                  ),
-                );
-              },
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          if (widget.isHost)
-            ElevatedButton(
-              onPressed: canSubmit ? _finalizeVotes : null,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                backgroundColor: Colors.red,
+                    child: ListTile(
+                      leading: const Icon(Icons.person, color: Color(0xFF08C8E9)),
+                      title: Text(name, style: const TextStyle(color: Colors.white)),
+                      subtitle: isMe 
+                          ? const Text('(You)', style: TextStyle(color: Color(0xFFB0B0B0))) 
+                          : null,
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF1A1A2E),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              '$votes',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          if (!isMe)
+                            ElevatedButton(
+                              onPressed: () => _submitVote(id),
+                              style: isMyVote
+                                  ? ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF08C8E9),
+                                    )
+                                  : OutlinedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF2A2A3E),
+                                      side: const BorderSide(color: Color(0xFF08C8E9)),
+                                    ),
+                              child: Text(
+                                isMyVote ? 'Voted' : 'Vote',
+                                style: TextStyle(
+                                  color: isMyVote 
+                                      ? const Color(0xFF1A1A2E) 
+                                      : const Color(0xFF08C8E9),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
-              child: Text(
-                canSubmit 
-                    ? 'Submit Votes' 
-                    : _readyCount < _totalPlayers
-                        ? 'Waiting for all votes...'
-                        : 'Need majority to submit',
-                style: const TextStyle(fontSize: 18, color: Colors.white),
-              ),
             ),
 
-          if (!widget.isHost)
-            const Text(
-              'Discuss and vote! Host will submit when ready.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey),
-            ),
-        ],
-      ),
-    );
-  }
+            const SizedBox(height: 16),
+
+            if (widget.isHost)
+              ElevatedButton(
+                onPressed: canSubmit ? _finalizeVotes : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF5252),
+                  foregroundColor: Colors.white,
+                ),
+                child: Text(
+                  canSubmit 
+                      ? 'Submit Votes' 
+                      : _readyCount < _totalPlayers
+                          ? 'Waiting for all votes...'
+                          : 'Need majority to submit',
+                ),
+              ),
+
+            if (!widget.isHost)
+              const Text(
+                'Discuss and vote! Host will submit when ready.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Color(0xFFB0B0B0)),
+              ),
+          ],
+        ),
+      );
+    }
 
   Widget _buildResultsPhase() {
     final impostorCaught = _results?['impostor_caught'] ?? false;
@@ -611,8 +658,16 @@ class _GameScreenState extends State<GameScreen> {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: impostorCaught ? Colors.green.shade100 : Colors.red.shade100,
+              color: impostorCaught 
+                  ? const Color(0xFF08C8E9).withOpacity(0.15) 
+                  : const Color(0xFFFF5252).withOpacity(0.15),
               borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: impostorCaught 
+                    ? const Color(0xFF08C8E9) 
+                    : const Color(0xFFFF5252),
+                width: 2,
+              ),
             ),
             child: Column(
               children: [
@@ -621,18 +676,20 @@ class _GameScreenState extends State<GameScreen> {
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: impostorCaught ? Colors.green : Colors.red,
+                    color: impostorCaught 
+                        ? const Color(0xFF08C8E9) 
+                        : const Color(0xFFFF5252),
                   ),
                 ),
                 const SizedBox(height: 16),
                 Text(
                   'The impostor was: $impostorName',
-                  style: const TextStyle(fontSize: 18),
+                  style: const TextStyle(fontSize: 18, color: Colors.white),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Voted out: $votedOutName',
-                  style: const TextStyle(fontSize: 16, color: Colors.grey),
+                  style: const TextStyle(fontSize: 16, color: Color(0xFFB0B0B0)),
                 ),
               ],
             ),
@@ -642,7 +699,11 @@ class _GameScreenState extends State<GameScreen> {
 
           const Text(
             'Scoreboard',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF08C8E9),
+            ),
           ),
           const SizedBox(height: 12),
           Expanded(
@@ -651,14 +712,31 @@ class _GameScreenState extends State<GameScreen> {
               itemBuilder: (context, index) {
                 final player = players[index];
                 return Card(
+                  color: const Color(0xFF2A2A3E),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   child: ListTile(
-                    leading: CircleAvatar(child: Text('${index + 1}')),
-                    title: Text(player['name']),
+                    leading: CircleAvatar(
+                      backgroundColor: const Color(0xFF08C8E9),
+                      child: Text(
+                        '${index + 1}',
+                        style: const TextStyle(
+                          color: Color(0xFF1A1A2E),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    title: Text(
+                      player['name'],
+                      style: const TextStyle(color: Colors.white),
+                    ),
                     trailing: Text(
                       '${player['points']} pts',
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
+                        color: Color(0xFF08C8E9),
                       ),
                     ),
                   ),
@@ -672,17 +750,14 @@ class _GameScreenState extends State<GameScreen> {
           if (widget.isHost)
             ElevatedButton(
               onPressed: _startNextSession,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-              child: const Text('Next Round', style: TextStyle(fontSize: 18)),
+              child: const Text('Next Round'),
             ),
 
           if (!widget.isHost)
             const Text(
               'Waiting for host to start next round...',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(color: Color(0xFFB0B0B0)),
             ),
         ],
       ),
@@ -692,7 +767,6 @@ class _GameScreenState extends State<GameScreen> {
   Widget _buildGameOverPhase() {
     final players = _results?['players'] as List<dynamic>? ?? [];
     
-    // Sort players by points to find winner
     final sortedPlayers = List<dynamic>.from(players);
     sortedPlayers.sort((a, b) => (b['points'] ?? 0).compareTo(a['points'] ?? 0));
     
@@ -706,8 +780,12 @@ class _GameScreenState extends State<GameScreen> {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.amber.shade100,
+              color: const Color(0xFFFFD700).withOpacity(0.15),
               borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: const Color(0xFFFFD700),
+                width: 2,
+              ),
             ),
             child: Column(
               children: [
@@ -716,25 +794,29 @@ class _GameScreenState extends State<GameScreen> {
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: Colors.amber,
+                    color: Color(0xFFFFD700),
                   ),
                 ),
                 const SizedBox(height: 16),
                 if (winner != null) ...[
                   const Text(
                     'Winner:',
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                    style: TextStyle(fontSize: 16, color: Color(0xFFB0B0B0)),
                   ),
                   Text(
                     '${winner['name']}',
                     style: const TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
                   Text(
                     '${winner['points']} points',
-                    style: const TextStyle(fontSize: 18),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      color: Color(0xFF08C8E9),
+                    ),
                   ),
                 ],
               ],
@@ -745,7 +827,11 @@ class _GameScreenState extends State<GameScreen> {
 
           const Text(
             'Final Scores',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF08C8E9),
+            ),
           ),
           const SizedBox(height: 12),
           Expanded(
@@ -754,18 +840,40 @@ class _GameScreenState extends State<GameScreen> {
               itemBuilder: (context, index) {
                 final player = sortedPlayers[index];
                 return Card(
-                  color: index == 0 ? Colors.amber.shade50 : null,
+                  color: index == 0 
+                      ? const Color(0xFFFFD700).withOpacity(0.15) 
+                      : const Color(0xFF2A2A3E),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: index == 0 
+                        ? const BorderSide(color: Color(0xFFFFD700), width: 1) 
+                        : BorderSide.none,
+                  ),
                   child: ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: index == 0 ? Colors.amber : null,
-                      child: Text(index == 0 ? '👑' : '${index + 1}'),
+                      backgroundColor: index == 0 
+                          ? const Color(0xFFFFD700) 
+                          : const Color(0xFF08C8E9),
+                      child: Text(
+                        index == 0 ? '👑' : '${index + 1}',
+                        style: TextStyle(
+                          color: index == 0 
+                              ? Colors.white 
+                              : const Color(0xFF1A1A2E),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
-                    title: Text(player['name']),
+                    title: Text(
+                      player['name'],
+                      style: const TextStyle(color: Colors.white),
+                    ),
                     trailing: Text(
                       '${player['points']} pts',
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
+                        color: Color(0xFF08C8E9),
                       ),
                     ),
                   ),
@@ -779,34 +887,35 @@ class _GameScreenState extends State<GameScreen> {
           if (widget.isHost) ...[
             ElevatedButton(
               onPressed: _startNewGameSameCategory,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                backgroundColor: Colors.green,
-              ),
-              child: const Text(
-                'Play Again (Same Category)',
-                style: TextStyle(fontSize: 18, color: Colors.white),
-              ),
+              child: const Text('Play Again (Same Category)'),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _newCategoryController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'New Category',
-                border: OutlineInputBorder(),
+                labelStyle: const TextStyle(color: Color(0xFFB0B0B0)),
                 hintText: 'e.g., Movies, Food, Animals',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFF08C8E9)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFFB0B0B0)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFF08C8E9), width: 2),
+                ),
+                filled: false,
               ),
+              style: const TextStyle(color: Colors.white),
             ),
             const SizedBox(height: 12),
-            ElevatedButton(
+            OutlinedButton(
               onPressed: _startNewGameNewCategory,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-              child: const Text(
-                'Start New Game',
-                style: TextStyle(fontSize: 18),
-              ),
+              child: const Text('Start New Game'),
             ),
           ],
 
@@ -814,7 +923,7 @@ class _GameScreenState extends State<GameScreen> {
             const Text(
               'Waiting for host to start a new game...',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(color: Color(0xFFB0B0B0)),
             ),
         ],
       ),

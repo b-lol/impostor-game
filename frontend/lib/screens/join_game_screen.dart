@@ -1,46 +1,59 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
-import 'menu_screen.dart';
+import 'lobby_screen.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class JoinGameScreen extends StatefulWidget {
+  final String playerId;
+  final String playerName;
+
+  const JoinGameScreen({
+    super.key,
+    required this.playerId,
+    required this.playerName,
+  });
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<JoinGameScreen> createState() => _JoinGameScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  final TextEditingController _nameController = TextEditingController();
+class _JoinGameScreenState extends State<JoinGameScreen> {
   final ApiService _apiService = ApiService();
+  final TextEditingController _gameCodeController = TextEditingController();
   bool _isLoading = false;
 
-  Future<void> _registerPlayer() async {
-    if (_nameController.text.trim().isEmpty) {
+  Future<void> _joinGame() async {
+    if (_gameCodeController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter your name')),
+        const SnackBar(content: Text('Please enter a game code')),
       );
       return;
     }
 
     setState(() => _isLoading = true);
 
-    final playerId = await _apiService.registerPlayer(_nameController.text.trim());
+    final players = await _apiService.joinGame(
+      widget.playerId,
+      _gameCodeController.text.trim().toUpperCase(),
+    );
 
     setState(() => _isLoading = false);
 
-    if (playerId != null) {
+    if (players != null) {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => MenuScreen(
-            playerId: playerId,
-            playerName: _nameController.text.trim(),
+          builder: (context) => LobbyScreen(
+            playerId: widget.playerId,
+            playerName: widget.playerName,
+            gameId: _gameCodeController.text.trim().toUpperCase(),
+            isHost: false,
+            existingPlayers: players,
           ),
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to register. Is the server running?')),
+        const SnackBar(content: Text('Game not found')),
       );
     }
   }
@@ -61,9 +74,9 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             const Spacer(flex: 1),
 
-            // Title from Figma
+            // Title
             const Text(
-              "What's your name?",
+              'Join a Game',
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w600,
@@ -72,11 +85,11 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 24),
 
-            // Outlined text field from original
+            // Game code input
             TextField(
-              controller: _nameController,
+              controller: _gameCodeController,
               decoration: InputDecoration(
-                labelText: 'Your Name',
+                labelText: 'Game Code',
                 labelStyle: const TextStyle(color: Color(0xFFB0B0B0)),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -92,17 +105,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 filled: false,
               ),
-              textCapitalization: TextCapitalization.words,
+              textCapitalization: TextCapitalization.characters,
               style: const TextStyle(color: Colors.white),
             ),
             const SizedBox(height: 24),
 
-            // Continue button
+            // Join button
             ElevatedButton(
-              onPressed: _isLoading ? null : _registerPlayer,
+              onPressed: _isLoading ? null : _joinGame,
               child: _isLoading
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text('Continue'),
+                  : const Text('Join'),
             ),
 
             const Spacer(flex: 3),

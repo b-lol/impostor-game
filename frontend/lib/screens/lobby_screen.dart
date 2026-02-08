@@ -34,7 +34,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
   void initState() {
     super.initState();
     _connectWebSocket();
-    _players = List.from(widget.existingPlayers); // Add self to list
+    _players = List.from(widget.existingPlayers);
   }
 
   void _connectWebSocket() {
@@ -54,13 +54,11 @@ class _LobbyScreenState extends State<LobbyScreen> {
       });
     } else if (type == 'player_disconnected') {
       setState(() {
-        // For now just show a message
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('A player disconnected')),
         );
       });
     } else if (type == 'game_started') {
-      // Host started the game, move to game screen
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -88,12 +86,10 @@ class _LobbyScreenState extends State<LobbyScreen> {
         const SnackBar(content: Text('Failed to start game')),
       );
     }
-    // If successful, the WebSocket will receive 'game_started' and navigate
   }
 
   @override
   void dispose() {
-    // Don't disconnect here - we pass the service to GameScreen
     super.dispose();
   }
 
@@ -112,14 +108,14 @@ class _LobbyScreenState extends State<LobbyScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.blue.shade50,
-                borderRadius: BorderRadius.circular(8),
+                color: const Color(0xFF2A2A3E),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
                 children: [
                   const Text(
                     'Game Code',
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                    style: TextStyle(fontSize: 16, color: Color(0xFFB0B0B0)),
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -128,12 +124,13 @@ class _LobbyScreenState extends State<LobbyScreen> {
                       fontSize: 36,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 4,
+                      color: Color(0xFF08C8E9),
                     ),
                   ),
                   const SizedBox(height: 8),
                   const Text(
                     'Share this code with friends!',
-                    style: TextStyle(color: Colors.grey),
+                    style: TextStyle(color: Color(0xFFB0B0B0)),
                   ),
                 ],
               ),
@@ -152,10 +149,22 @@ class _LobbyScreenState extends State<LobbyScreen> {
                 itemCount: _players.length,
                 itemBuilder: (context, index) {
                   return Card(
+                    color: const Color(0xFF2A2A3E),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     child: ListTile(
-                      leading: const Icon(Icons.person),
+                      leading: const Icon(Icons.person, color: Color(0xFF08C8E9)),
                       title: Text(_players[index]),
-                      trailing: index == 0 ? const Chip(label: Text('Host')) : null,
+                      trailing: index == 0
+                          ? Chip(
+                              label: const Text(
+                                'Host',
+                                style: TextStyle(color: Color(0xFF1A1A2E)),
+                              ),
+                              backgroundColor: const Color(0xFF08C8E9),
+                            )
+                          : null,
                     ),
                   );
                 },
@@ -164,20 +173,15 @@ class _LobbyScreenState extends State<LobbyScreen> {
 
             const SizedBox(height: 16),
 
-            // Start Button (Host only)
             if (widget.isHost)
               ElevatedButton(
                 onPressed: _isLoading || _players.length < 2 ? null : _startGame,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
                     : Text(
-                        _players.length < 2 
-                            ? 'Waiting for players...' 
+                        _players.length < 2
+                            ? 'Waiting for players...'
                             : 'Start Game',
-                        style: const TextStyle(fontSize: 18),
                       ),
               ),
 
@@ -185,7 +189,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
               const Text(
                 'Waiting for host to start the game...',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.grey),
+                style: TextStyle(fontSize: 16, color: Color(0xFFB0B0B0)),
               ),
           ],
         ),
