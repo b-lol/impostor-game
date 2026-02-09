@@ -5,6 +5,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware 
 from game_manager import register_player, create_game,join_game, start_game, start_session, active_games, submit_vote, end_session, quit_game, cleanup_inactive_games, update_activity
 from connection_manager import ConnectionManager
+import os
 
 
 @asynccontextmanager
@@ -32,7 +33,9 @@ def register_player_endpoint(name:str):
     return {"player_id": player_id}
 
 @app.post("/game/create")
-def create_game_endpoint(host_id: str, max_round: int, clue_time: int, secret_category: str):
+def create_game_endpoint(host_id: str, max_round: int, clue_time: int, secret_category: str, passcode: str = ""):
+    if secret_category and passcode != os.environ.get("CATEGORY_PASSCODE", ""):
+        return {"error": "Invalid passcode for custom category"}
     game_id = create_game(host_id, max_round, clue_time, secret_category)
     return {"game_id": game_id}
 
