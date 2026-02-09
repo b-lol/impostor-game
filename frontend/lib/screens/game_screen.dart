@@ -568,6 +568,7 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
+
   Widget _buildVotingPhase() {
     final canSubmit = _readyCount == _totalPlayers && _hasMajority();
     
@@ -611,13 +612,13 @@ class _GameScreenState extends State<GameScreen> {
                 
                 final id = _voteTally.isEmpty 
                     ? player!.id 
-                    : _voteTally[index]['id'];
+                    : _voteTally[index]['id'] as String;
                 final name = _voteTally.isEmpty 
                     ? player!.name 
-                    : _voteTally[index]['name'];
+                    : _voteTally[index]['name'] as String;
                 final votes = _voteTally.isEmpty 
                     ? 0 
-                    : _voteTally[index]['votes'];
+                    : _voteTally[index]['votes'] as int;
                 
                 final isMe = id == widget.playerId;
                 final isMyVote = id == _myVoteId;
@@ -633,62 +634,55 @@ class _GameScreenState extends State<GameScreen> {
                         : BorderSide.none,
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    child: Row(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    child: Column(
                       children: [
-                        Expanded(
-                          child: Row(
-                            children: [
-                              const Icon(Icons.person, color: Color(0xFF08C8E9), size: 20),
-                              const SizedBox(width: 8),
-                              Flexible(
-                                child: Text(
-                                  isMe ? '$name (You)' : name,
-                                  style: TextStyle(
-                                    color: isMe ? const Color(0xFFB0B0B0) : Colors.white,
-                                    fontSize: 16,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
+                        Row(
+                          children: [
+                            const Icon(Icons.person, color: Color(0xFF08C8E9), size: 20),
+                            const SizedBox(width: 8),
+                            Text(
+                              isMe ? '$name (You)' : name,
+                              style: TextStyle(
+                                color: isMe ? const Color(0xFFB0B0B0) : Colors.white,
+                                fontSize: 16,
+                              ),
+                            ),
+                            const Spacer(),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF1A1A2E),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                '$votes',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF1A1A2E),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            '$votes',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
                             ),
-                          ),
+                          ],
                         ),
                         if (!isMe) ...[
-                          const SizedBox(width: 8),
+                          const SizedBox(height: 8),
                           SizedBox(
-                            height: 36,
+                            width: double.infinity,
                             child: ElevatedButton(
                               onPressed: () => _submitVote(id),
                               style: isMyVote
                                   ? ElevatedButton.styleFrom(
                                       backgroundColor: const Color(0xFF08C8E9),
-                                      padding: const EdgeInsets.symmetric(horizontal: 12),
                                     )
                                   : ElevatedButton.styleFrom(
                                       backgroundColor: const Color(0xFF2A2A3E),
                                       side: const BorderSide(color: Color(0xFF08C8E9)),
-                                      padding: const EdgeInsets.symmetric(horizontal: 12),
                                     ),
                               child: Text(
-                                isMyVote ? 'Voted' : 'Vote',
+                                isMyVote ? 'Voted ✓' : 'Vote',
                                 style: TextStyle(
-                                  fontSize: 13,
                                   color: isMyVote 
                                       ? const Color(0xFF1A1A2E) 
                                       : const Color(0xFF08C8E9),
