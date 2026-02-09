@@ -2,6 +2,9 @@ from models import GamePlay, Player, SecretWordSession
 from claude_service import generate_secret_word 
 import random
 import string
+import json
+import os
+
 
 active_games = {}
 active_players = {}
@@ -59,21 +62,21 @@ def start_game(game_id: str) -> bool:
         if currentgame.secretCategory:
             words = generate_secret_word(currentgame.secretCategory, currentgame.maxRound, currentgame.wordsUsed)
         else:
-            words = generate_secret_word("common object or trending topics", currentgame.maxRound, currentgame.wordsUsed)
+            words = load_default_words(currentgame.maxRound, currentgame.wordsUsed)
         
         currentgame.fillAvailableWords(words)
         return True
     except KeyError:
         return False
     
-
 def start_session(game_id):
     try:
         current_game = active_games[game_id]
         if not current_game.wordsAvailable:
             if current_game.secretCategory:
                 current_game.wordsAvailable = generate_secret_word(current_game.secretCategory, current_game.maxRound, current_game.wordsUsed)
-            else: current_game.wordsAvailable = generate_secret_word("common object or trending topics", current_game.maxRound, current_game.wordsUsed)
+            else:
+                current_game.wordsAvailable = load_default_words(current_game.maxRound, current_game.wordsUsed)
         impostor = current_game.impostorSchedule.pop(0)
         currentWord = current_game.giveWord()
         session = SecretWordSession(current_game.loPlayers, currentWord, impostor)
@@ -152,3 +155,18 @@ def end_session(game_id: str) -> dict:
         }
     except KeyError:
         return None
+
+def load_default_words(count: int, used_words: list[str]) -> list[str]:
+    words_path = os.path.join(os.path.dirname(__file__), "words.json")
+    with open(words_path, "r") as f:
+        word_data = json.load(f)
+    
+    # Flatten all categories into one list
+    all_words = []
+    for category_words in word_data.values():
+        all_words.extend(category_words)
+    
+    # Remove any already used words
+    available = [w for w in all_words if w not in used_words]
+    
+    return random.sample(available, min(count, len(available)))

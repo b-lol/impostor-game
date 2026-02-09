@@ -1,0 +1,86 @@
+{
+  "Food & Drinks": [
+    "sushi", "croissant", "espresso", "guacamole", "pancakes",
+    "boba tea", "kimchi", "tiramisu", "ramen", "smoothie",
+    "burrito", "cheesecake", "lasagna", "dumpling", "pretzel",
+    "waffle", "kombucha", "tacos", "fondue", "poutine",
+    "gelato", "sriracha", "mochi", "chai latte", "bruschetta"
+  ],
+  "Sports": [
+    "slam dunk", "hat trick", "penalty kick", "touchdown", "home run",
+    "free throw", "offside", "knockout", "triple axel", "hole in one",
+    "buzzer beater", "checkmate", "marathon", "relay race", "foul shot",
+    "kickoff", "overtime", "halftime", "shutout", "grand slam",
+    "steeplechase", "decathlon", "slap shot", "corner kick", "ace serve"
+  ],
+  "Animals": [
+    "platypus", "chameleon", "flamingo", "penguin", "octopus",
+    "hedgehog", "jellyfish", "peacock", "seahorse", "armadillo",
+    "porcupine", "cheetah", "dolphin", "toucan", "koala",
+    "pangolin", "axolotl", "narwhal", "iguana", "pelican",
+    "anaconda", "meerkat", "capybara", "mantis", "starfish"
+  ],
+  "Movies & TV": [
+    "plot twist", "cliffhanger", "blooper reel", "box office", "red carpet",
+    "sequel", "cameo", "soundtrack", "binge watch", "spoiler alert",
+    "sitcom", "reboot", "documentary", "stunt double", "audition",
+    "montage", "director's cut", "green screen", "voice acting", "spin-off",
+    "rom-com", "jump scare", "time travel", "superhero", "animation"
+  ],
+  "Technology": [
+    "bluetooth", "algorithm", "screenshot", "dark mode", "firewall",
+    "cloud storage", "pixel", "streaming", "encryption", "chatbot",
+    "bandwidth", "hotspot", "podcast", "touchscreen", "hashtag",
+    "bookmark", "malware", "ethernet", "notification", "selfie",
+    "drone", "smartwatch", "cryptocurrency", "virtual reality", "two-factor"
+  ],
+  "Places & Travel": [
+    "passport", "jet lag", "souvenir", "layover", "road trip",
+    "cruise ship", "hostel", "landmark", "time zone", "customs",
+    "boarding pass", "carry-on", "resort", "gondola", "safari",
+    "lighthouse", "volcano", "waterfall", "canyon", "glacier",
+    "temple", "marketplace", "subway", "rooftop bar", "food truck"
+  ],
+  "Music": [
+    "playlist", "autotune", "encore", "mixtape", "karaoke",
+    "bass drop", "vinyl record", "chorus", "acoustic", "concert",
+    "headliner", "mosh pit", "remix", "backstage", "drumroll",
+    "falsetto", "hook", "bridge", "melody", "amp",
+    "festival", "metronome", "duet", "beatbox", "jukebox"
+  ],
+  "Fashion": [
+    "sneakers", "vintage", "denim jacket", "runway", "streetwear",
+    "crop top", "tie-dye", "athleisure", "beanie", "jumpsuit",
+    "stilettos", "bomber jacket", "turtleneck", "flannel", "choker",
+    "windbreaker", "overalls", "trench coat", "bucket hat", "hoodie",
+    "sunglasses", "cargo pants", "leather jacket", "polo shirt", "cardigan"
+  ],
+  "Science": [
+    "black hole", "photosynthesis", "gravity", "microscope", "fossil",
+    "earthquake", "telescope", "molecule", "magnet", "eclipse",
+    "asteroid", "bacteria", "voltage", "tornado", "chromosome",
+    "neutron", "prism", "catalyst", "tectonic plates", "supernova",
+    "hypothesis", "carbon dioxide", "radiation", "hemisphere", "spectrum"
+  ],
+  "Everyday Objects": [
+    "remote control", "umbrella", "sticky note", "rubber band", "zipper",
+    "extension cord", "coaster", "clothespin", "whisk", "plunger",
+    "doorbell", "paperclip", "measuring tape", "corkscrew", "lint roller",
+    "duct tape", "flashlight", "bubble wrap", "ice tray", "key chain",
+    "stapler", "alarm clock", "thermostat", "shoelace", "pillowcase"
+  ],
+  "Professions": [
+    "firefighter", "astronaut", "lifeguard", "bartender", "surgeon",
+    "detective", "electrician", "pharmacist", "pilot", "veterinarian",
+    "carpenter", "tattoo artist", "journalist", "paramedic", "locksmith",
+    "sommelier", "barista", "translator", "stunt performer", "auctioneer",
+    "chiropractor", "florist", "chauffeur", "curator", "air traffic controller"
+  ],
+  "Pop Culture": [
+    "meme", "viral video", "cosplay", "fan fiction", "unboxing",
+    "influencer", "vlog", "photobomb", "throwback", "fandom",
+    "stan", "cancel culture", "trending", "clickbait", "binge-worthy",
+    "collab", "retweet", "livestream", "aesthetic", "ship",
+    "Easter egg", "side quest", "speedrun", "rage quit", "power-up"
+  ]
+}
