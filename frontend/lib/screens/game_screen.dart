@@ -343,6 +343,8 @@ class _GameScreenState extends State<GameScreen> {
           ),
         ],
       ),
+      body: _buildBody(),
+    );
   }
 
   Widget _buildBody() {
