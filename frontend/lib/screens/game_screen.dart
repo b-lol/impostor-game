@@ -572,6 +572,84 @@ class _GameScreenState extends State<GameScreen> {
   Widget _buildVotingPhase() {
     final canSubmit = _readyCount == _totalPlayers && _hasMajority();
     
+    // Build player list from either voteTally or turnOrder
+    final int playerCount = _voteTally.isEmpty 
+        ? _session?.turnOrder.length ?? 0 
+        : _voteTally.length;
+    
+    List<Widget> playerCards = [];
+    
+    for (int i = 0; i < playerCount; i++) {
+      final id = _voteTally.isEmpty 
+          ? _session!.turnOrder[i].id 
+          : '${_voteTally[i]['id']}';
+      final name = _voteTally.isEmpty 
+          ? _session!.turnOrder[i].name 
+          : '${_voteTally[i]['name']}';
+      final votes = _voteTally.isEmpty 
+          ? 0 
+          : (_voteTally[i]['votes'] ?? 0) as int;
+      
+      final isMe = id == widget.playerId;
+      final isMyVote = id == _myVoteId;
+
+      playerCards.add(
+        GestureDetector(
+          onTap: isMe ? null : () => _submitVote(id),
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: isMyVote 
+                  ? const Color(0xFF08C8E9).withOpacity(0.15) 
+                  : const Color(0xFF2A2A3E),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isMyVote 
+                    ? const Color(0xFF08C8E9) 
+                    : Colors.transparent,
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.person, color: Color(0xFF08C8E9), size: 20),
+                const SizedBox(width: 12),
+                Text(
+                  isMe ? '$name (You)' : name,
+                  style: TextStyle(
+                    color: isMe ? const Color(0xFFB0B0B0) : Colors.white,
+                    fontSize: 16,
+                  ),
+                ),
+                const Spacer(),
+                if (isMyVote)
+                  const Padding(
+                    padding: EdgeInsets.only(right: 8),
+                    child: Text('✓', style: TextStyle(color: Color(0xFF08C8E9), fontSize: 18)),
+                  ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1A1A2E),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '$votes',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     return Padding(
       padding: const EdgeInsets.all(24.0),
       child: Column(
@@ -601,102 +679,7 @@ class _GameScreenState extends State<GameScreen> {
           const SizedBox(height: 24),
 
           Expanded(
-            child: ListView.builder(
-              itemCount: _voteTally.isEmpty 
-                  ? _session?.turnOrder.length ?? 0 
-                  : _voteTally.length,
-              itemBuilder: (context, index) {
-                final player = _voteTally.isEmpty
-                    ? _session!.turnOrder[index]
-                    : null;
-                
-                final id = _voteTally.isEmpty 
-                    ? player!.id 
-                    : _voteTally[index]['id'] as String;
-                final name = _voteTally.isEmpty 
-                    ? player!.name 
-                    : _voteTally[index]['name'] as String;
-                final votes = _voteTally.isEmpty 
-                    ? 0 
-                    : _voteTally[index]['votes'] as int;
-                
-                final isMe = id == widget.playerId;
-                final isMyVote = id == _myVoteId;
-
-                return Card(
-                  color: isMyVote 
-                      ? const Color(0xFF08C8E9).withOpacity(0.15) 
-                      : const Color(0xFF2A2A3E),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    side: isMyVote 
-                        ? const BorderSide(color: Color(0xFF08C8E9), width: 1) 
-                        : BorderSide.none,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.person, color: Color(0xFF08C8E9), size: 20),
-                            const SizedBox(width: 8),
-                            Text(
-                              isMe ? '$name (You)' : name,
-                              style: TextStyle(
-                                color: isMe ? const Color(0xFFB0B0B0) : Colors.white,
-                                fontSize: 16,
-                              ),
-                            ),
-                            const Spacer(),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF1A1A2E),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                '$votes',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        if (!isMe) ...[
-                          const SizedBox(height: 8),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: () => _submitVote(id),
-                              style: isMyVote
-                                  ? ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF08C8E9),
-                                    )
-                                  : ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF2A2A3E),
-                                      side: const BorderSide(color: Color(0xFF08C8E9)),
-                                    ),
-                              child: Text(
-                                isMyVote ? 'Voted ✓' : 'Vote',
-                                style: TextStyle(
-                                  color: isMyVote 
-                                      ? const Color(0xFF1A1A2E) 
-                                      : const Color(0xFF08C8E9),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
+            child: ListView(children: playerCards),
           ),
 
           const SizedBox(height: 16),
