@@ -24,15 +24,17 @@ class ApiService {
     required int maxRound,
     required int clueTime,
     required String secretCategory,
+    String passcode = "",
   }) async {
     final response = await http.post(
       Uri.parse(
-        '$baseUrl/game/create?host_id=$hostId&max_round=$maxRound&clue_time=$clueTime&secret_category=$secretCategory',
+        '$baseUrl/game/create?host_id=$hostId&max_round=$maxRound&clue_time=$clueTime&secret_category=$secretCategory&passcode=$passcode',
       ),
     );
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
+      if (data['error'] != null) return null;
       return data['game_id'];
     }
     return null;

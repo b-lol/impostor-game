@@ -21,7 +21,14 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
   final TextEditingController _roundsController = TextEditingController(text: '3');
   final TextEditingController _timerController = TextEditingController(text: '30');
   final TextEditingController _categoryController = TextEditingController();
+  final TextEditingController _passcodeController = TextEditingController();
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _categoryController.addListener(() => setState(() {}));
+  }
 
   Future<void> _createGame() async {
     setState(() => _isLoading = true);
@@ -31,6 +38,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
       maxRound: int.tryParse(_roundsController.text) ?? 3,
       clueTime: int.tryParse(_timerController.text) ?? 30,
       secretCategory: _categoryController.text.trim(),
+      passcode: _passcodeController.text.trim(),
     );
 
     setState(() => _isLoading = false);
@@ -50,7 +58,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to create game')),
+        const SnackBar(content: Text('Failed to create game. Check your passcode if using a category.')),
       );
     }
   }
@@ -160,6 +168,32 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
               ),
               style: const TextStyle(color: Colors.white),
             ),
+            const SizedBox(height: 16),
+
+            // Passcode (only shows when category is entered)
+            if (_categoryController.text.trim().isNotEmpty)
+              TextField(
+                controller: _passcodeController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: 'Passcode',
+                  labelStyle: const TextStyle(color: Color(0xFFB0B0B0)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFF08C8E9)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFFB0B0B0)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFF08C8E9), width: 2),
+                  ),
+                  filled: false,
+                ),
+                style: const TextStyle(color: Colors.white),
+              ),
             const SizedBox(height: 24),
 
             // Create button
