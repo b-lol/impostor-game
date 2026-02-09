@@ -14,10 +14,12 @@ class SplashScreen extends StatelessWidget {
             const Spacer(flex: 2),
 
             // Logo
-            Image.asset(
-              'assets/AppIconTransparent',
-              width: double.infinity,
-              fit:BoxFit.contain,
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 200, maxHeight: 200),
+              child: Image.asset(
+                'assets/AppIconTransparent',
+                fit: BoxFit.contain,
+              ),
             ),
             const SizedBox(height: 16),
 
