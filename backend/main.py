@@ -1,11 +1,19 @@
+import asyncio
+from contextlib import asynccontextmanager
 from models import GamePhase
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware 
-from game_manager import register_player, create_game,join_game, start_game, start_session, active_games, submit_vote, end_session, quit_game
+from game_manager import register_player, create_game,join_game, start_game, start_session, active_games, submit_vote, end_session, quit_game, cleanup_inactive_games, update_activity
 from connection_manager import ConnectionManager
 
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app):
+    task = asyncio.create_task(cleanup_loop())
+    yield
+    task.cancel()
+
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -27,6 +35,20 @@ def register_player_endpoint(name:str):
 def create_game_endpoint(host_id: str, max_round: int, clue_time: int, secret_category: str):
     game_id = create_game(host_id, max_round, clue_time, secret_category)
     return {"game_id": game_id}
+
+
+async def cleanup_loop():
+    while True:
+        await asyncio.sleep(60)  # Check every minute
+        deleted = cleanup_inactive_games(5)
+        for game_id in deleted:
+            await manager.broadcast_to_game(game_id, {
+                "type": "game_deleted",
+                "data": {"reason": "Game timed out due to inactivity"}
+            })
+            # Clean up connections
+            if game_id in manager.active_connections:
+                del manager.active_connections[game_id]
 
 @app.post("/game/join")
 async def join_game_endpoint(player_id: str, game_id: str):
@@ -157,6 +179,7 @@ async def websocket_endpoint(websocket: WebSocket, game_id: str, player_id: str)
         })
 
 async def handle_message(game_id: str, player_id: str, message: dict):
+    update_activity(game_id)
     message_type = message.get("type")
     data = message.get("data", {})
     
@@ -185,6 +208,9 @@ async def handle_message(game_id: str, player_id: str, message: dict):
     
     elif message_type == "quit_game":
         await handle_quit_game(game_id, player_id)
+    
+    elif message_type == "skip_turn":
+        await handle_skip_turn(game_id, player_id)
 
 async def handle_end_turn(game_id: str, player_id: str):
     game = active_games.get(game_id)
@@ -533,3 +559,30 @@ async def handle_quit_game(game_id: str, player_id: str):
     
     # Disconnect the quitting player's websocket
     manager.disconnect(game_id, player_id)
+
+async def handle_skip_turn(game_id: str, player_id: str):
+    game = active_games.get(game_id)
+    if not game or not game.currentSession:
+        return
+    
+    # Only host can skip
+    if player_id != game.hostID:
+        return
+    
+    session = game.currentSession
+    
+    # Move to next turn
+    session.currentTurnIndex += 1
+    if session.currentTurnIndex >= len(session.playOrder):
+        session.currentTurnIndex = 0
+    
+    next_player = session.playOrder[session.currentTurnIndex]
+    
+    await manager.broadcast_to_game(game_id, {
+        "type": "next_turn",
+        "data": {
+            "player_id": next_player.id,
+            "player_name": next_player.name,
+            "was_skipped": True
+        }
+    })

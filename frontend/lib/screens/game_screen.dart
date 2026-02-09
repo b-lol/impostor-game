@@ -528,6 +528,19 @@ class _GameScreenState extends State<GameScreen> {
               'Listen to the clue...',
               style: TextStyle(fontSize: 18, color: Color(0xFFB0B0B0)),
             ),
+            if (widget.isHost) ...[
+              const SizedBox(height: 16),
+              OutlinedButton(
+                onPressed: _skipTurn,
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Color(0xFFFF5252)),
+                ),
+                child: const Text(
+                  'Skip Turn',
+                  style: TextStyle(color: Color(0xFFFF5252)),
+                ),
+              ),
+            ],
           ],
 
           const SizedBox(height: 48),
@@ -1002,5 +1015,12 @@ class _GameScreenState extends State<GameScreen> {
     _timer?.cancel();
     widget.webSocketService.disconnect();
     super.dispose();
+  }
+
+  void _skipTurn() {
+    widget.webSocketService.sendMessage({
+      'type': 'skip_turn',
+      'data': {},
+    });
   }
 }

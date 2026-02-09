@@ -4,6 +4,7 @@ import random
 import string
 import json
 import os
+from datetime import datetime
 
 
 active_games = {}
@@ -212,3 +213,24 @@ def quit_game(game_id: str, player_id: str) -> dict:
         "new_host_id": new_host_id,
         "player_name": player_to_remove.name
     }
+
+def cleanup_inactive_games(timeout_minutes: int = 5) -> list[str]:
+    now = datetime.now()
+    games_to_delete = []
+    
+    for game_id, game in list(active_games.items()):
+        minutes_inactive = (now - game.last_activity).total_seconds() / 60
+        if minutes_inactive >= timeout_minutes:
+            # Remove all players from active_players
+            for player in game.loPlayers:
+                if player.id in active_players:
+                    del active_players[player.id]
+            del active_games[game_id]
+            games_to_delete.append(game_id)
+    
+    return games_to_delete
+
+def update_activity(game_id: str):
+    game = active_games.get(game_id)
+    if game:
+        game.last_activity = datetime.now()

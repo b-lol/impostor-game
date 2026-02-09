@@ -1,6 +1,7 @@
 from enum import Enum
 import random
 from math import floor
+from datetime import datetime
 
 class GamePhase (Enum):
     #this class is to help keep track of which phase of the game its in
@@ -55,6 +56,7 @@ class GamePlay ():
         self.wordsAvailable = []
         self.wordsUsed = []
         self.currentSession :SecretWordSession = None
+        self.last_activity = datetime.now()
         
     
     def changeCategory (self, descriptionNew: str):
