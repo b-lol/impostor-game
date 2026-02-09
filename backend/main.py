@@ -1,7 +1,7 @@
 from models import GamePhase
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware 
-from game_manager import register_player, create_game,join_game, start_game, start_session, active_games, submit_vote, end_session
+from game_manager import register_player, create_game,join_game, start_game, start_session, active_games, submit_vote, end_session, quit_game
 from connection_manager import ConnectionManager
 
 
@@ -182,6 +182,9 @@ async def handle_message(game_id: str, player_id: str, message: dict):
     elif message_type == "new_game":
         new_category = data.get("category")
         await handle_new_game(game_id, player_id, new_category)
+    
+    elif message_type == "quit_game":
+        await handle_quit_game(game_id, player_id)
 
 async def handle_end_turn(game_id: str, player_id: str):
     game = active_games.get(game_id)
@@ -461,6 +464,7 @@ async def handle_toggle_ready_start(game_id: str, player_id: str):
             p.ready_to_start = False
     
 async def handle_new_game(game_id: str, player_id: str, new_category: str = None):
+
     game = active_games.get(game_id)
     if not game:
         return
@@ -505,3 +509,27 @@ async def handle_new_game(game_id: str, player_id: str, new_category: str = None
             "same_category": new_category is None
         }
     })
+
+async def handle_quit_game(game_id: str, player_id: str):
+    result = quit_game(game_id, player_id)
+    
+    if result["status"] == "game_deleted":
+        await manager.broadcast_to_game(game_id, {
+            "type": "game_deleted",
+            "data": {}
+        })
+        return
+    
+    if result["status"] == "player_removed":
+        # Notify remaining players
+        await manager.broadcast_to_game(game_id, {
+            "type": "player_quit",
+            "data": {
+                "player_name": result["player_name"],
+                "player_id": player_id,
+                "new_host_id": result["new_host_id"]
+            }
+        })
+    
+    # Disconnect the quitting player's websocket
+    manager.disconnect(game_id, player_id)

@@ -3,6 +3,7 @@ import 'dart:async';
 import '../services/api_service.dart';
 import '../services/websocket_service.dart';
 import '../models/game_session.dart';
+import 'package:flutter/services.dart';
 
 class GameScreen extends StatefulWidget {
   final String playerId;
@@ -160,6 +161,19 @@ class _GameScreenState extends State<GameScreen> {
           _currentPhase = _isGameOver ? 'game_over' : 'results';
         });
         break;
+        
+      case 'player_quit':
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${data['player_name']} left the game'),
+            backgroundColor: const Color(0xFFFF5252),
+          ),
+        );
+        break;
+
+      case 'game_deleted':
+        SystemNavigator.pop();
+        break;
       
       case 'new_game_started':
         setState(() {
@@ -273,6 +287,45 @@ class _GameScreenState extends State<GameScreen> {
     return playersWithMax == 1 && maxVotes > 0;
   }
 
+  void _showQuitDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF2A2A3E),
+        title: const Text(
+          'Quit Game',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: const Text(
+          'Quitting will remove you from the game and close the app.',
+          style: TextStyle(color: Color(0xFFB0B0B0)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text(
+              'Go Back',
+              style: TextStyle(color: Color(0xFF08C8E9)),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              widget.webSocketService.sendMessage({
+                'type': 'quit_game',
+                'data': {},
+              });
+              SystemNavigator.pop();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFF5252),
+            ),
+            child: const Text('Quit', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -282,9 +335,14 @@ class _GameScreenState extends State<GameScreen> {
           style: const TextStyle(color: Color(0xFF08C8E9)),
         ),
         automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            onPressed: _showQuitDialog,
+            icon: const Icon(Icons.exit_to_app, color: Color(0xFFFF5252)),
+            tooltip: 'Quit Game',
+          ),
+        ],
       ),
-      body: _buildBody(),
-    );
   }
 
   Widget _buildBody() {

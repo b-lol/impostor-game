@@ -170,3 +170,45 @@ def load_default_words(count: int, used_words: list[str]) -> list[str]:
     available = [w for w in all_words if w not in used_words]
     
     return random.sample(available, min(count, len(available)))
+
+def quit_game(game_id: str, player_id: str) -> dict:
+    game = active_games.get(game_id)
+    if not game:
+        return {"status": "game_not_found"}
+    
+    # Remove player from game
+    player_to_remove = None
+    for p in game.loPlayers:
+        if p.id == player_id:
+            player_to_remove = p
+            break
+    
+    if not player_to_remove:
+        return {"status": "player_not_found"}
+    
+    game.loPlayers.remove(player_to_remove)
+    
+    # Remove from active players
+    if player_id in active_players:
+        del active_players[player_id]
+    
+    # Remove from impostor schedule if present
+    game.impostorSchedule = [p for p in game.impostorSchedule if p.id != player_id]
+    
+    # If no players left, delete the game
+    if not game.loPlayers:
+        del active_games[game_id]
+        return {"status": "game_deleted"}
+    
+    # If host quit, transfer to next player
+    new_host_id = None
+    if player_id == game.hostID:
+        new_host = game.loPlayers[0]
+        game.hostID = new_host.id
+        new_host_id = new_host.id
+    
+    return {
+        "status": "player_removed",
+        "new_host_id": new_host_id,
+        "player_name": player_to_remove.name
+    }
