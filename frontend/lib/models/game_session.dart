@@ -18,7 +18,7 @@ class GameSession {
   final List<PlayerInfo> turnOrder;
   String currentTurn;
   String currentTurnId;
-  final int clueTimer;
+  int clueTimer;
 
   GameSession({
     required this.visitorRole,

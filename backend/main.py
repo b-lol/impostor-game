@@ -215,6 +215,10 @@ async def handle_message(game_id: str, player_id: str, message: dict):
     elif message_type == "skip_turn":
         await handle_skip_turn(game_id, player_id)
 
+    elif message_type == "change_timer":
+        new_time = data.get("new_time", 30)
+        await handle_change_timer(game_id, player_id, new_time)
+
 async def handle_end_turn(game_id: str, player_id: str):
     game = active_games.get(game_id)
     if not game or not game.currentSession:
@@ -588,4 +592,18 @@ async def handle_skip_turn(game_id: str, player_id: str):
             "player_name": next_player.name,
             "was_skipped": True
         }
+    })
+
+async def handle_change_timer(game_id: str, player_id: str, new_time: int):
+    game = active_games.get(game_id)
+    if not game:
+        return
+    if player_id != game.hostID:
+        return
+    
+    game.clueTimer = new_time
+    
+    await manager.broadcast_to_game(game_id, {
+        "type": "timer_changed",
+        "data": {"new_time": new_time}
     })

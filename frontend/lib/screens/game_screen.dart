@@ -65,6 +65,9 @@ class _GameScreenState extends State<GameScreen> {
     _timer?.cancel();
     _timeRemaining = _session?.clueTimer ?? 30;
     
+    // Don't start countdown if timer is 0 (no timer mode)
+    if (_timeRemaining == 0) return;
+    
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         if (_timeRemaining > 0) {
@@ -185,6 +188,14 @@ class _GameScreenState extends State<GameScreen> {
         if (widget.isHost) {
           _startSession();
         }
+        break;
+
+      case 'timer_changed':
+        setState(() {
+          _session?.clueTimer = data['new_time'];
+          _timeRemaining = data['new_time'];
+        });
+        _startTimer();
         break;
     }
   }
@@ -470,32 +481,34 @@ class _GameScreenState extends State<GameScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           // Timer display
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: _timeRemaining <= 5 
-                  ? const Color(0xFFFF5252).withOpacity(0.2) 
-                  : const Color(0xFF08C8E9).withOpacity(0.2),
-              shape: BoxShape.circle,
-              border: Border.all(
+          if ((_session?.clueTimer ?? 0) > 0) ...[
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
                 color: _timeRemaining <= 5 
-                    ? const Color(0xFFFF5252) 
-                    : const Color(0xFF08C8E9),
-                width: 2,
+                    ? const Color(0xFFFF5252).withOpacity(0.2) 
+                    : const Color(0xFF08C8E9).withOpacity(0.2),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: _timeRemaining <= 5 
+                      ? const Color(0xFFFF5252) 
+                      : const Color(0xFF08C8E9),
+                  width: 2,
+                ),
+              ),
+              child: Text(
+                '$_timeRemaining',
+                style: TextStyle(
+                  fontSize: 48,
+                  fontWeight: FontWeight.bold,
+                  color: _timeRemaining <= 5 
+                      ? const Color(0xFFFF5252) 
+                      : const Color(0xFF08C8E9),
+                ),
               ),
             ),
-            child: Text(
-              '$_timeRemaining',
-              style: TextStyle(
-                fontSize: 48,
-                fontWeight: FontWeight.bold,
-                color: _timeRemaining <= 5 
-                    ? const Color(0xFFFF5252) 
-                    : const Color(0xFF08C8E9),
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
+            const SizedBox(height: 24),
+          ],
           
           Text(
             isMyTurn ? 'YOUR TURN!' : 'Current Turn:',
@@ -544,6 +557,37 @@ class _GameScreenState extends State<GameScreen> {
               ),
             ],
           ],
+          const SizedBox(height: 24),
+          GestureDetector(
+            onLongPressStart: (_) => setState(() => _showRole = true),
+            onLongPressEnd: (_) => setState(() => _showRole = false),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: _showRole
+                    ? (_session!.isImpostor ? const Color(0xFFFF5252).withOpacity(0.2) : const Color(0xFF08C8E9).withOpacity(0.2))
+                    : const Color(0xFF2A2A3E),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: _showRole
+                      ? (_session!.isImpostor ? const Color(0xFFFF5252) : const Color(0xFF08C8E9))
+                      : const Color(0xFFB0B0B0),
+                ),
+              ),
+              child: Text(
+                _showRole
+                    ? (_session!.isImpostor ? '🕵️ IMPOSTOR' : '🔑 ${_session!.secretWord}')
+                    : '👆 Hold to peek at role',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: _showRole
+                      ? (_session!.isImpostor ? const Color(0xFFFF5252) : const Color(0xFF08C8E9))
+                      : const Color(0xFFB0B0B0),
+                ),
+              ),
+            ),
+          ),
 
           const SizedBox(height: 48),
           Divider(color: const Color(0xFFB0B0B0).withOpacity(0.3)),
@@ -563,6 +607,28 @@ class _GameScreenState extends State<GameScreen> {
                 : null,
             child: Text(_isReady ? 'Ready to Vote ✓' : 'Ready to Vote'),
           ),
+          if (widget.isHost) ...[
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  onPressed: () => _changeTimer((_session?.clueTimer ?? 30) - 10),
+                  icon: const Icon(Icons.remove_circle_outline, color: Color(0xFFFF5252)),
+                ),
+                Text(
+                  (_session?.clueTimer ?? 0) == 0 
+                      ? 'No Timer' 
+                      : '${_session?.clueTimer}s',
+                  style: const TextStyle(color: Colors.white, fontSize: 16),
+                ),
+                IconButton(
+                  onPressed: () => _changeTimer((_session?.clueTimer ?? 30) + 10),
+                  icon: const Icon(Icons.add_circle_outline, color: Color(0xFF08C8E9)),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
@@ -1008,6 +1074,13 @@ class _GameScreenState extends State<GameScreen> {
     widget.webSocketService.sendMessage({
       'type': 'skip_turn',
       'data': {},
+    });
+  }
+
+  void _changeTimer(int newTime) {
+    widget.webSocketService.sendMessage({
+      'type': 'change_timer',
+      'data': {'new_time': newTime},
     });
   }
 }
