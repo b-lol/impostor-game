@@ -633,27 +633,29 @@ class _GameScreenState extends State<GameScreen> {
                         : BorderSide.none,
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                     child: Row(
                       children: [
-                        const Icon(Icons.person, color: Color(0xFF08C8E9)),
-                        const SizedBox(width: 12),
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          child: Row(
                             children: [
-                              Text(name, style: const TextStyle(color: Colors.white, fontSize: 16)),
-                              if (isMe)
-                                const Text('(You)', style: TextStyle(color: Color(0xFFB0B0B0), fontSize: 14)),
+                              const Icon(Icons.person, color: Color(0xFF08C8E9), size: 20),
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Text(
+                                  isMe ? '$name (You)' : name,
+                                  style: TextStyle(
+                                    color: isMe ? const Color(0xFFB0B0B0) : Colors.white,
+                                    fontSize: 16,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
                             ],
                           ),
                         ),
-                        const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 4,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
                             color: const Color(0xFF1A1A2E),
                             borderRadius: BorderRadius.circular(12),
@@ -661,7 +663,7 @@ class _GameScreenState extends State<GameScreen> {
                           child: Text(
                             '$votes',
                             style: const TextStyle(
-                              fontSize: 18,
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
@@ -669,22 +671,28 @@ class _GameScreenState extends State<GameScreen> {
                         ),
                         if (!isMe) ...[
                           const SizedBox(width: 8),
-                          ElevatedButton(
-                            onPressed: () => _submitVote(id),
-                            style: isMyVote
-                                ? ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF08C8E9),
-                                  )
-                                : OutlinedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF2A2A3E),
-                                    side: const BorderSide(color: Color(0xFF08C8E9)),
-                                  ),
-                            child: Text(
-                              isMyVote ? 'Voted' : 'Vote',
-                              style: TextStyle(
-                                color: isMyVote 
-                                    ? const Color(0xFF1A1A2E) 
-                                    : const Color(0xFF08C8E9),
+                          SizedBox(
+                            height: 36,
+                            child: ElevatedButton(
+                              onPressed: () => _submitVote(id),
+                              style: isMyVote
+                                  ? ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF08C8E9),
+                                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                                    )
+                                  : ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF2A2A3E),
+                                      side: const BorderSide(color: Color(0xFF08C8E9)),
+                                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                                    ),
+                              child: Text(
+                                isMyVote ? 'Voted' : 'Vote',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: isMyVote 
+                                      ? const Color(0xFF1A1A2E) 
+                                      : const Color(0xFF08C8E9),
+                                ),
                               ),
                             ),
                           ),
