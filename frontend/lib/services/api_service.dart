@@ -68,7 +68,7 @@ class ApiService {
         (data['players'] as List).map((p) => p['name'])
       );
     }
-    return [];
+    return null; //Game not found- no players
   }
   return null;  // null means failed
 }
