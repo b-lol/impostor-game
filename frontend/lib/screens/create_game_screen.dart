@@ -173,6 +173,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                   borderSide: const BorderSide(color: Color(0xFF08C8E9), width: 2),
                 ),
                 filled: false,
+                hintText: 'e.g., Formula 1 or Olympics',
                 helperText: 'Enter a category for the secret word.\nLeave blank for random words\nEx:Japan->secret words: Tokyo, Anime, Samurai',
                 helperMaxLines:4,
                 helperStyle: const TextStyle(color: Color(0xFFB0B0B0), fontSize: 12),

@@ -53,11 +53,13 @@ class _GameScreenState extends State<GameScreen> {
   final TextEditingController _newCategoryController = TextEditingController();
   final TextEditingController _newRoundsController = TextEditingController();
   final TextEditingController _newTimerController = TextEditingController();
+  final TextEditingController _newPasscodeController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     widget.webSocketService.onMessageReceived = _handleMessage;
+    _newCategoryController.addListener(() => setState(() {}));
     
     if (widget.rejoinSession != null) {
       // Rejoining mid-game — restore state from rejoin data
@@ -278,10 +280,12 @@ class _GameScreenState extends State<GameScreen> {
     });
   }
 
+  // Sends new game settings to the backend via WebSocket
   void _submitNewGameSettings() {
     final rounds = int.tryParse(_newRoundsController.text.trim());
     final timer = int.tryParse(_newTimerController.text.trim());
     final category = _newCategoryController.text.trim();
+    final passcode = _newPasscodeController.text.trim();
 
     if (rounds == null || rounds <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -296,6 +300,7 @@ class _GameScreenState extends State<GameScreen> {
         'max_round': rounds,
         'clue_timer': timer ?? _session?.clueTimer ?? 30,
         if (category.isNotEmpty) 'category': category,
+        if (passcode.isNotEmpty) 'passcode': passcode,
       },
     });
   }
@@ -964,78 +969,101 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
+  // ── Host Settings Screen ──
+  // Shown when host taps "Continue Playing?" on game over screen.
+  // Mirrors the layout from create_game_screen.dart.
+
   Widget _buildHostSettingsPhase() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Title
           const Text(
             'New Game Settings',
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+              fontSize: 22,
+              fontWeight: FontWeight.w600,
               color: Color(0xFF08C8E9),
             ),
           ),
-          const SizedBox(height: 32),
-
-          const Text('Rounds', style: TextStyle(color: Color(0xFFB0B0B0))),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _newRoundsController,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              hintText: 'e.g., 3',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFFB0B0B0)),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF08C8E9), width: 2),
-              ),
-            ),
-            style: const TextStyle(color: Colors.white),
-          ),
           const SizedBox(height: 24),
 
-          const Text('Timer (seconds)', style: TextStyle(color: Color(0xFFB0B0B0))),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _newTimerController,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              hintText: '0 for no timer',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+          // Rounds and Timer side by side
+          Row(
+            children: [
+              // Rounds input
+              Expanded(
+                child: TextField(
+                  controller: _newRoundsController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: 'Rounds',
+                    labelStyle: const TextStyle(color: Color(0xFFB0B0B0)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFF08C8E9)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFFB0B0B0)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFF08C8E9), width: 2),
+                    ),
+                    filled: false,
+                    helperText: '# of rounds to \nplay per game',
+                    helperMaxLines: 2,
+                    helperStyle: const TextStyle(color: Color(0xFFB0B0B0), fontSize: 12),
+                  ),
+                  style: const TextStyle(color: Colors.white),
+                ),
               ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFFB0B0B0)),
+              const SizedBox(width: 12),
+              // Timer input
+              Expanded(
+                child: TextField(
+                  controller: _newTimerController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: 'Timer (sec)',
+                    labelStyle: const TextStyle(color: Color(0xFFB0B0B0)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFF08C8E9)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFFB0B0B0)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFF08C8E9), width: 2),
+                    ),
+                    filled: false,
+                    helperText: 'Time for clue giving\n(0 for no timer)',
+                    helperMaxLines: 2,
+                    helperStyle: const TextStyle(color: Color(0xFFB0B0B0), fontSize: 12),
+                  ),
+                  style: const TextStyle(color: Colors.white),
+                ),
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF08C8E9), width: 2),
-              ),
-            ),
-            style: const TextStyle(color: Colors.white),
+            ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
 
-          const Text('Category (leave blank to keep current)', 
-            style: TextStyle(color: Color(0xFFB0B0B0))),
-          const SizedBox(height: 8),
+          // Category input (optional)
           TextField(
             controller: _newCategoryController,
             decoration: InputDecoration(
-              hintText: 'e.g., Movies, Food, Animals',
+              labelText: 'Category (Optional)',
+              labelStyle: const TextStyle(color: Color(0xFFB0B0B0)),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Color(0xFF08C8E9)),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -1045,11 +1073,45 @@ class _GameScreenState extends State<GameScreen> {
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(color: Color(0xFF08C8E9), width: 2),
               ),
+              filled: false,
+              hintText: 'e.g., Formula 1 or Olympics',
+              helperText: 'Leave blank to keep current category.\nEx: Japan gives words like Tokyo, Anime, Samurai',
+              helperMaxLines: 3,
+              helperStyle: const TextStyle(color: Color(0xFFB0B0B0), fontSize: 12),
             ),
             style: const TextStyle(color: Colors.white),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 16),
 
+          // Passcode — only shows when category is entered
+          if (_newCategoryController.text.trim().isNotEmpty)
+            TextField(
+              controller: _newPasscodeController,
+              obscureText: true,
+              decoration: InputDecoration(
+                labelText: 'Passcode',
+                labelStyle: const TextStyle(color: Color(0xFFB0B0B0)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFF08C8E9)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFFB0B0B0)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFF08C8E9), width: 2),
+                ),
+                filled: false,
+                helperText: 'Required for custom categories. Ask b-lol',
+                helperStyle: const TextStyle(color: Color(0xFFB0B0B0), fontSize: 12),
+              ),
+              style: const TextStyle(color: Colors.white),
+            ),
+          const SizedBox(height: 24),
+
+          // Start button
           ElevatedButton(
             onPressed: _submitNewGameSettings,
             child: const Text('Start Game'),
@@ -1057,8 +1119,10 @@ class _GameScreenState extends State<GameScreen> {
         ],
       ),
     );
-  } 
+  }
 
+  // ── Game Over Screen ──
+  // Shows final scores, winner, and options to continue or quit.
   Widget _buildGameOverPhase() {
     final players = _results?['players'] as List<dynamic>? ?? [];
     
@@ -1179,6 +1243,7 @@ class _GameScreenState extends State<GameScreen> {
 
           const SizedBox(height: 16),
 
+          // Host gets continue and quit buttons
           if (widget.isHost) ...[
             ElevatedButton(
               onPressed: _continuePlaying,
@@ -1197,6 +1262,7 @@ class _GameScreenState extends State<GameScreen> {
             ),
           ],
 
+          // Non-host gets quit button and waiting message
           if (!widget.isHost) ...[
             OutlinedButton(
               onPressed: _showQuitDialog,

@@ -221,7 +221,8 @@ async def handle_message(game_id: str, player_id: str, message: dict):
         new_category = data.get("category")
         max_round = data.get("max_round")
         clue_timer = data.get("clue_timer")
-        await handle_new_game(game_id, player_id, new_category, max_round, clue_timer)
+        passcode = data.get("passcode", "")
+        await handle_new_game(game_id, player_id, new_category, max_round, clue_timer, passcode)
     
     elif message_type == "quit_game":
         await handle_quit_game(game_id, player_id)
@@ -568,12 +569,17 @@ async def handle_new_game(game_id: str, player_id: str, new_category: str = None
         }
     })
 
-async def handle_continue_game(game_id: str, player_id: str):
+async def handle_new_game(game_id: str, player_id: str, new_category: str = None, max_round: int = None, clue_timer: int = None, passcode: str = ""):
     game = active_games.get(game_id)
     if not game:
         return
     if player_id != game.hostID:
         return
+    if new_category:
+        if passcode != os.environ.get("CATEGORY_PASSCODE", ""):
+            return
+        game.secretCategory = new_category
+        game.wordsUsed = []
     
     await manager.broadcast_to_game(game_id, {
         "type": "host_choosing_settings",
