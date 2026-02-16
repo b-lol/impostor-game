@@ -516,59 +516,6 @@ async def handle_toggle_ready_start(game_id: str, player_id: str):
         for p in game.loPlayers:
             p.ready_to_start = False
     
-async def handle_new_game(game_id: str, player_id: str, new_category: str = None, max_round: int = None, clue_timer: int = None):
-
-    game = active_games.get(game_id)
-    if not game:
-        return
-    
-    # Only host can start new game
-    if player_id != game.hostID:
-        return
-    
-    # Update category if provided
-    if new_category:
-        game.secretCategory = new_category
-        game.wordsUsed = []  # Reset used words for new category
-    
-    if max_round:
-        game.maxRound = max_round
-
-    if clue_timer is not None:
-        game.clueTimer = clue_timer
-    
-    # Reset game state
-    game.wordsAvailable = []
-    game.impostorSchedule = []
-    
-    # Reset player points
-    for p in game.loPlayers:
-        p.points = 0
-        p.ready_to_start = False
-        p.ready_to_vote = False
-        p.has_voted = False
-        p.voted_for_id = None
-        p.votes = 0
-    
-    # Regenerate words and impostor schedule
-    from game_manager import createImpostorSchedule
-    from claude_service import generate_secret_word
-    
-    game.impostorSchedule = createImpostorSchedule(game.loPlayers, game.maxRound)
-    words = generate_secret_word(game.secretCategory, game.maxRound, game.wordsUsed)
-    game.fillAvailableWords(words)
-    
-    # Reset phase
-    game.phase = GamePhase.LOBBY
-    
-    await manager.broadcast_to_game(game_id, {
-        "type": "new_game_started",
-        "data": {
-            "category": game.secretCategory,
-            "same_category": new_category is None
-        }
-    })
-
 async def handle_new_game(game_id: str, player_id: str, new_category: str = None, max_round: int = None, clue_timer: int = None, passcode: str = ""):
     game = active_games.get(game_id)
     if not game:
@@ -609,6 +556,18 @@ async def handle_quit_game(game_id: str, player_id: str):
     
     # Disconnect the quitting player's websocket
     manager.disconnect(game_id, player_id)
+
+async def handle_continue_game(game_id: str, player_id: str):
+    game = active_games.get(game_id)
+    if not game:
+        return
+    if player_id != game.hostID:
+        return
+    
+    await manager.broadcast_to_game(game_id, {
+        "type": "host_choosing_settings",
+        "data": {}
+    })
 
 async def handle_skip_turn(game_id: str, player_id: str):
     game = active_games.get(game_id)
