@@ -51,6 +51,12 @@ def join_game(player_id : str, game_id:str):
          print(f"The game was not found. Please confirm you have the correct game id: {game_id}, and try again")
          return False
     player = active_players[player_id]
+    
+    # Prevent duplicate joins
+    for p in game.loPlayers:
+        if p.id == player_id:
+            return True  # Already in the game, just return success
+    
     game.addNewPlayer(player)
     print(f"Player {player_id} joined game {game_id}")
     return True

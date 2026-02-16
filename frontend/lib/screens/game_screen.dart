@@ -353,22 +353,30 @@ class _GameScreenState extends State<GameScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Game: ${widget.gameId}',
-          style: const TextStyle(color: Color(0xFF08C8E9)),
-        ),
-        automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            onPressed: _showQuitDialog,
-            icon: const Icon(Icons.exit_to_app, color: Color(0xFFFF5252)),
-            tooltip: 'Quit Game',
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          _showQuitDialog();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            'Game: ${widget.gameId}',
+            style: const TextStyle(color: Color(0xFF08C8E9)),
           ),
-        ],
+          automaticallyImplyLeading: false,
+          actions: [
+            IconButton(
+              onPressed: _showQuitDialog,
+              icon: const Icon(Icons.exit_to_app, color: Color(0xFFFF5252)),
+              tooltip: 'Quit Game',
+            ),
+          ],
+        ),
+        body: _buildBody(),
       ),
-      body: _buildBody(),
     );
   }
 
