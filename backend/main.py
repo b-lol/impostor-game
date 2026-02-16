@@ -558,8 +558,12 @@ async def handle_new_game(game_id: str, player_id: str, new_category: str = None
     from claude_service import generate_secret_word
     
     game.impostorSchedule = createImpostorSchedule(game.loPlayers, game.maxRound)
-    words = generate_secret_word(game.secretCategory, game.maxRound, game.wordsUsed)
-    game.fillAvailableWords(words)
+    if game.secretCategory:
+        words = generate_secret_word(game.secretCategory, game.maxRound, game.wordsUsed)
+    else:
+        from game_manager import load_default_words
+        words = load_default_words(game.maxRound, game.wordsUsed)
+        game.fillAvailableWords(words)
     
     # Reset phase
     game.phase = GamePhase.LOBBY
