@@ -19,6 +19,7 @@ class GameSession {
   String currentTurn;
   String currentTurnId;
   int clueTimer;
+  int maxRound;
 
   GameSession({
     required this.visitorRole,
@@ -27,6 +28,7 @@ class GameSession {
     required this.currentTurn,
     required this.currentTurnId,
     required this.clueTimer,
+    required this.maxRound,
   });
 
   factory GameSession.fromJson(Map<String, dynamic> json) {
@@ -39,6 +41,7 @@ class GameSession {
       currentTurn: json['current_turn'],
       currentTurnId: json['current_turn_id'],
       clueTimer: json['clue_timer'],
+      maxRound: json['max_round'],
     );
   }
 

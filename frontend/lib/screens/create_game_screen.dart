@@ -77,12 +77,10 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
         ),
         title: const SizedBox.shrink(),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           children: [
-            const Spacer(flex: 1),
-
             // Title
             const Text(
               'Create a Game',
@@ -116,6 +114,9 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                         borderSide: const BorderSide(color: Color(0xFF08C8E9), width: 2),
                       ),
                       filled: false,
+                      helperText: '# of rounds to \nplay per game',
+                      helperMaxLines: 2,
+                      helperStyle: const TextStyle(color: Color(0xFFB0B0B0), fontSize: 12),
                     ),
                     keyboardType: TextInputType.number,
                     style: const TextStyle(color: Colors.white),
@@ -141,6 +142,9 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                         borderSide: const BorderSide(color: Color(0xFF08C8E9), width: 2),
                       ),
                       filled: false,
+                      helperText: 'Time for clue giving\n(0 for no timer)',
+                      helperMaxLines: 2,
+                      helperStyle: const TextStyle(color: Color(0xFFB0B0B0), fontSize: 12),
                     ),
                     keyboardType: TextInputType.number,
                     style: const TextStyle(color: Colors.white),
@@ -169,6 +173,9 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                   borderSide: const BorderSide(color: Color(0xFF08C8E9), width: 2),
                 ),
                 filled: false,
+                helperText: 'Enter a category for the secret word.\nLeave blank for random words\nEx:Japan gives secret words\n like Tokyo, Anime, Samurai',
+                helperMaxLines:2,
+                helperStyle: const TextStyle(color: Color(0xFFB0B0B0), fontSize: 12),
               ),
               style: const TextStyle(color: Colors.white),
             ),
@@ -195,6 +202,8 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                     borderSide: const BorderSide(color: Color(0xFF08C8E9), width: 2),
                   ),
                   filled: false,
+                  helperText: 'Required for custom categories. Ask b-lol',
+                  helperStyle: const TextStyle(color: Color(0xFFB0B0B0), fontSize: 12)
                 ),
                 style: const TextStyle(color: Colors.white),
               ),
@@ -207,8 +216,6 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                   ? const CircularProgressIndicator(color: Colors.white)
                   : const Text('Create'),
             ),
-
-            const Spacer(flex: 3),
           ],
         ),
       ),

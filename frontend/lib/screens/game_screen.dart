@@ -51,6 +51,8 @@ class _GameScreenState extends State<GameScreen> {
   // Game over
   bool _isGameOver = false;
   final TextEditingController _newCategoryController = TextEditingController();
+  final TextEditingController _newRoundsController = TextEditingController();
+  final TextEditingController _newTimerController = TextEditingController();
 
   @override
   void initState() {
@@ -209,6 +211,11 @@ class _GameScreenState extends State<GameScreen> {
         });
         _startTimer();
         break;
+
+      case 'host_choosing_settings':
+        setState(() {_currentPhase = 'waiting_for_host';
+        });
+      break;
     }
   }
 
@@ -268,27 +275,42 @@ class _GameScreenState extends State<GameScreen> {
     });
   }
 
-  void _startNewGameSameCategory() {
-    widget.webSocketService.sendMessage({
-      'type': 'new_game',
-      'data': {},
-    });
-  }
+  void _submitNewGameSettings() {
+    final rounds = int.tryParse(_newRoundsController.text.trim());
+    final timer = int.tryParse(_newTimerController.text.trim());
+    final category = _newCategoryController.text.trim();
 
-  void _startNewGameNewCategory() {
-    if (_newCategoryController.text.trim().isEmpty) {
+    if (rounds == null || rounds <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a category')),
+        const SnackBar(content: Text('Please enter a valid number of rounds')),
       );
       return;
     }
-    
+
     widget.webSocketService.sendMessage({
       'type': 'new_game',
-      'data': {'category': _newCategoryController.text.trim()},
+      'data': {
+        'max_round': rounds,
+        'clue_timer': timer ?? _session?.clueTimer ?? 30,
+        if (category.isNotEmpty) 'category': category,
+      },
     });
-    
+  }
+
+  void _continuePlaying() {
+    widget.webSocketService.sendMessage({
+      'type': 'continue_game',
+      'data': {},
+    });
+
+    // Pre-fill with current settings
+    _newRoundsController.text = '${_session?.maxRound ?? 3}';
+    _newTimerController.text = '${_session?.clueTimer ?? 30}';
     _newCategoryController.clear();
+
+    setState(() {
+      _currentPhase = 'host_settings';
+    });
   }
 
   bool _hasMajority() {
@@ -381,7 +403,7 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   Widget _buildBody() {
-    if (_session == null && _currentPhase != 'results' && _currentPhase != 'game_over') {
+    if (_session == null && _currentPhase != 'results' && _currentPhase != 'game_over' && _currentPhase != 'host_settings' && _currentPhase != 'waiting_for_host') {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -396,6 +418,10 @@ class _GameScreenState extends State<GameScreen> {
         return _buildResultsPhase();
       case 'game_over':
         return _buildGameOverPhase();
+      case 'host_settings':
+        return _buildHostSettingsPhase();
+      case 'waiting_for_host':
+        return _buildWaitingForHostPhase();
       default:
         return const Center(child: CircularProgressIndicator());
     }
@@ -919,6 +945,117 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
+  Widget _buildWaitingForHostPhase() {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(color: Color(0xFF08C8E9)),
+          SizedBox(height: 24),
+          Text(
+            'Host is choosing new settings...',
+            style: TextStyle(fontSize: 18, color: Color(0xFFB0B0B0)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHostSettingsPhase() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text(
+            'New Game Settings',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF08C8E9),
+            ),
+          ),
+          const SizedBox(height: 32),
+
+          const Text('Rounds', style: TextStyle(color: Color(0xFFB0B0B0))),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _newRoundsController,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              hintText: 'e.g., 3',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Color(0xFFB0B0B0)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Color(0xFF08C8E9), width: 2),
+              ),
+            ),
+            style: const TextStyle(color: Colors.white),
+          ),
+          const SizedBox(height: 24),
+
+          const Text('Timer (seconds)', style: TextStyle(color: Color(0xFFB0B0B0))),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _newTimerController,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              hintText: '0 for no timer',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Color(0xFFB0B0B0)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Color(0xFF08C8E9), width: 2),
+              ),
+            ),
+            style: const TextStyle(color: Colors.white),
+          ),
+          const SizedBox(height: 24),
+
+          const Text('Category (leave blank to keep current)', 
+            style: TextStyle(color: Color(0xFFB0B0B0))),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _newCategoryController,
+            decoration: InputDecoration(
+              hintText: 'e.g., Movies, Food, Animals',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Color(0xFFB0B0B0)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Color(0xFF08C8E9), width: 2),
+              ),
+            ),
+            style: const TextStyle(color: Colors.white),
+          ),
+          const SizedBox(height: 32),
+
+          ElevatedButton(
+            onPressed: _submitNewGameSettings,
+            child: const Text('Start Game'),
+          ),
+        ],
+      ),
+    );
+  } 
+
   Widget _buildGameOverPhase() {
     final players = _results?['players'] as List<dynamic>? ?? [];
     
@@ -1041,45 +1178,40 @@ class _GameScreenState extends State<GameScreen> {
 
           if (widget.isHost) ...[
             ElevatedButton(
-              onPressed: _startNewGameSameCategory,
-              child: const Text('Play Again (Same Category)'),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _newCategoryController,
-              decoration: InputDecoration(
-                labelText: 'New Category',
-                labelStyle: const TextStyle(color: Color(0xFFB0B0B0)),
-                hintText: 'e.g., Movies, Food, Animals',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFF08C8E9)),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFFB0B0B0)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFF08C8E9), width: 2),
-                ),
-                filled: false,
-              ),
-              style: const TextStyle(color: Colors.white),
+              onPressed: _continuePlaying,
+              child: const Text('Continue Playing?'),
             ),
             const SizedBox(height: 12),
             OutlinedButton(
-              onPressed: _startNewGameNewCategory,
-              child: const Text('Start New Game'),
+              onPressed: _showQuitDialog,
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Color(0xFFFF5252)),
+              ),
+              child: const Text(
+                'Quit Game',
+                style: TextStyle(color: Color(0xFFFF5252)),
+              ),
             ),
           ],
 
-          if (!widget.isHost)
+          if (!widget.isHost) ...[
+            OutlinedButton(
+              onPressed: _showQuitDialog,
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Color(0xFFFF5252)),
+              ),
+              child: const Text(
+                'Quit Game',
+                style: TextStyle(color: Color(0xFFFF5252)),
+              ),
+            ),
+            const SizedBox(height: 12),
             const Text(
-              'Waiting for host to start a new game...',
+              'Waiting for host...',
               textAlign: TextAlign.center,
               style: TextStyle(color: Color(0xFFB0B0B0)),
             ),
+          ],
         ],
       ),
     );
@@ -1105,4 +1237,5 @@ class _GameScreenState extends State<GameScreen> {
       'data': {'new_time': newTime},
     });
   }
+
 }

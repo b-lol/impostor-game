@@ -122,7 +122,8 @@ async def session_start_endpoint(game_id: str):
                     "turn_order": turn_order,
                     "current_turn": first_player.name,
                     "current_turn_id": first_player.id,
-                    "clue_timer": game.clueTimer
+                    "clue_timer": game.clueTimer,
+                    "max_round": game.maxRound
                 }
             })
         else:
@@ -134,7 +135,8 @@ async def session_start_endpoint(game_id: str):
                     "turn_order": turn_order,
                     "current_turn": first_player.name,
                     "current_turn_id": first_player.id,
-                    "clue_timer": game.clueTimer
+                    "clue_timer": game.clueTimer,
+                    "max_round": game.maxRound
                 }
             })
     
@@ -217,7 +219,9 @@ async def handle_message(game_id: str, player_id: str, message: dict):
     
     elif message_type == "new_game":
         new_category = data.get("category")
-        await handle_new_game(game_id, player_id, new_category)
+        max_round = data.get("max_round")
+        clue_timer = data.get("clue_timer")
+        await handle_new_game(game_id, player_id, new_category, max_round, clue_timer)
     
     elif message_type == "quit_game":
         await handle_quit_game(game_id, player_id)
@@ -228,6 +232,9 @@ async def handle_message(game_id: str, player_id: str, message: dict):
     elif message_type == "change_timer":
         new_time = data.get("new_time", 30)
         await handle_change_timer(game_id, player_id, new_time)
+    
+    elif message_type == "continue_game":
+        await handle_continue_game(game_id, player_id)
 
 async def handle_end_turn(game_id: str, player_id: str):
     game = active_games.get(game_id)
@@ -429,7 +436,8 @@ async def handle_start_next_session(game_id: str, player_id: str):
                     "turn_order": turn_order,
                     "current_turn": first_player.name,
                     "current_turn_id": first_player.id,
-                    "clue_timer": game.clueTimer
+                    "clue_timer": game.clueTimer,
+                    "max_round": game.maxRound
                 }
             })
         else:
@@ -442,7 +450,8 @@ async def handle_start_next_session(game_id: str, player_id: str):
                     "turn_order": turn_order,
                     "current_turn": first_player.name,
                     "current_turn_id": first_player.id,
-                    "clue_timer": game.clueTimer
+                    "clue_timer": game.clueTimer,
+                    "max_round": game.maxRound
                 }
             })
 
@@ -506,7 +515,7 @@ async def handle_toggle_ready_start(game_id: str, player_id: str):
         for p in game.loPlayers:
             p.ready_to_start = False
     
-async def handle_new_game(game_id: str, player_id: str, new_category: str = None):
+async def handle_new_game(game_id: str, player_id: str, new_category: str = None, max_round: int = None, clue_timer: int = None):
 
     game = active_games.get(game_id)
     if not game:
@@ -520,6 +529,12 @@ async def handle_new_game(game_id: str, player_id: str, new_category: str = None
     if new_category:
         game.secretCategory = new_category
         game.wordsUsed = []  # Reset used words for new category
+    
+    if max_round:
+        game.maxRound = max_round
+
+    if clue_timer is not None:
+        game.clueTimer = clue_timer
     
     # Reset game state
     game.wordsAvailable = []
@@ -551,6 +566,18 @@ async def handle_new_game(game_id: str, player_id: str, new_category: str = None
             "category": game.secretCategory,
             "same_category": new_category is None
         }
+    })
+
+async def handle_continue_game(game_id: str, player_id: str):
+    game = active_games.get(game_id)
+    if not game:
+        return
+    if player_id != game.hostID:
+        return
+    
+    await manager.broadcast_to_game(game_id, {
+        "type": "host_choosing_settings",
+        "data": {}
     })
 
 async def handle_quit_game(game_id: str, player_id: str):
