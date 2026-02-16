@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
 import 'lobby_screen.dart';
 
@@ -44,6 +45,9 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
     setState(() => _isLoading = false);
 
     if (gameId != null) {
+      //Save  game_id for rejoin
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('game_id', gameId);
       Navigator.push(
         context,
         MaterialPageRoute(

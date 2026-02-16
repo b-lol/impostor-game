@@ -234,3 +234,45 @@ def update_activity(game_id: str):
     game = active_games.get(game_id)
     if game:
         game.last_activity = datetime.now()
+
+def rejoin_game(game_id: str, player_id: str) -> dict:
+    game = active_games.get(game_id)
+    if not game:
+        return {"status": "game_not_found"}
+    
+    # Check if player is still in the game
+    player = None
+    for p in game.loPlayers:
+        if p.id == player_id:
+            player = p
+            break
+    
+    if not player:
+        return {"status": "player_not_found"}
+    
+    # Build current game state
+    players = [{"id": p.id, "name": p.name, "points": p.points} for p in game.loPlayers]
+    
+    session_data = None
+    if game.currentSession:
+        session = game.currentSession
+        is_impostor = (player == session.currentImpostor)
+        turn_order = [{"name": p.name, "id": p.id} for p in session.playOrder]
+        current_turn = session.playOrder[session.currentTurnIndex]
+        
+        session_data = {
+            "role": "impostor" if is_impostor else "player",
+            "word": None if is_impostor else session.secretWord,
+            "turn_order": turn_order,
+            "current_turn": current_turn.name,
+            "current_turn_id": current_turn.id,
+            "clue_timer": game.clueTimer,
+        }
+    
+    return {
+        "status": "success",
+        "phase": game.phase.value,
+        "players": players,
+        "is_host": player_id == game.hostID,
+        "session": session_data,
+    }

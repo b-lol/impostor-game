@@ -4,6 +4,7 @@ import '../services/api_service.dart';
 import '../services/websocket_service.dart';
 import '../models/game_session.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class GameScreen extends StatefulWidget {
   final String playerId;
@@ -11,6 +12,8 @@ class GameScreen extends StatefulWidget {
   final String gameId;
   final bool isHost;
   final WebSocketService webSocketService;
+  final GameSession? rejoinSession;
+  final String? rejoinPhase;
 
   const GameScreen({
     super.key,
@@ -19,6 +22,8 @@ class GameScreen extends StatefulWidget {
     required this.gameId,
     required this.isHost,
     required this.webSocketService,
+    this.rejoinSession,
+    this.rejoinPhase,
   });
 
   @override
@@ -52,7 +57,11 @@ class _GameScreenState extends State<GameScreen> {
     super.initState();
     widget.webSocketService.onMessageReceived = _handleMessage;
     
-    if (widget.isHost) {
+    if (widget.rejoinSession != null) {
+      // Rejoining mid-game — restore state from rejoin data
+      _session = widget.rejoinSession;
+      _currentPhase = widget.rejoinPhase ?? 'delegation';
+    } else if (widget.isHost) {
       _startSession();
     }
   }
@@ -175,6 +184,9 @@ class _GameScreenState extends State<GameScreen> {
         break;
 
       case 'game_deleted':
+        SharedPreferences.getInstance().then((prefs) {
+          prefs.remove('game_id');
+        });
         SystemNavigator.pop();
         break;
       
@@ -320,11 +332,13 @@ class _GameScreenState extends State<GameScreen> {
             ),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               widget.webSocketService.sendMessage({
                 'type': 'quit_game',
                 'data': {},
               });
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.remove('game_id');
               SystemNavigator.pop();
             },
             style: ElevatedButton.styleFrom(

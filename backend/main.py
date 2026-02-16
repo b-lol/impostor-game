@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from models import GamePhase
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware 
-from game_manager import register_player, create_game,join_game, start_game, start_session, active_games, submit_vote, end_session, quit_game, cleanup_inactive_games, update_activity
+from game_manager import register_player, create_game,join_game, start_game, start_session, active_games, submit_vote, end_session, quit_game, cleanup_inactive_games, update_activity, rejoin_game
 from connection_manager import ConnectionManager
 import os
 
@@ -77,6 +77,16 @@ async def join_game_endpoint(player_id: str, game_id: str):
         return {"message": "Successfully joined the game", "players": players}
     else:
         return {"message": "Game not found"}
+
+@app.post("/game/rejoin")
+async def rejoin_game_endpoint(game_id: str, player_id: str):
+    result = rejoin_game(game_id, player_id)
+    
+    if result["status"] == "success":
+        # Re-establish WebSocket will happen separately when client connects
+        return result
+    else:
+        return result
 
 @app.post("/game/start")
 async def start_game_endpoint(game_id: str):
@@ -607,3 +617,4 @@ async def handle_change_timer(game_id: str, player_id: str, new_time: int):
         "type": "timer_changed",
         "data": {"new_time": new_time}
     })
+

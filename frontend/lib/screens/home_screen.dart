@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
 import 'menu_screen.dart';
 
@@ -29,6 +30,11 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => _isLoading = false);
 
     if (playerId != null) {
+      //Save player credentials locally
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('player_id', playerId);
+      await prefs.setString('player_name', _nameController.text.trim());
+      
       Navigator.push(
         context,
         MaterialPageRoute(

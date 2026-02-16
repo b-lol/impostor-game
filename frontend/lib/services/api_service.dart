@@ -40,6 +40,21 @@ class ApiService {
     return null;
   }
 
+  // Rejoin an existing game
+  Future<Map<String, dynamic>?> rejoinGame(String playerId, String gameId) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/game/rejoin?game_id=$gameId&player_id=$playerId'),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['status'] == 'success') {
+        return data;
+      }
+    }
+    return null;
+  }
+
   // Join a game
   Future<List<String>?> joinGame(String playerId, String gameId) async {
   final response = await http.post(
