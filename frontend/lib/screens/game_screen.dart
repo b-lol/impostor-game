@@ -213,9 +213,12 @@ class _GameScreenState extends State<GameScreen> {
         break;
 
       case 'host_choosing_settings':
-        setState(() {_currentPhase = 'waiting_for_host';
-        });
-      break;
+        if (!widget.isHost) {
+          setState(() {
+            _currentPhase = 'waiting_for_host';
+          });
+        }
+        break;
     }
   }
 
