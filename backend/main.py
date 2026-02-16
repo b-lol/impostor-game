@@ -520,17 +520,56 @@ async def handle_new_game(game_id: str, player_id: str, new_category: str = None
     game = active_games.get(game_id)
     if not game:
         return
+    
+    # Only host can start new game
     if player_id != game.hostID:
         return
+    
+    # Update category if provided (requires passcode)
     if new_category:
         if passcode != os.environ.get("CATEGORY_PASSCODE", ""):
             return
         game.secretCategory = new_category
         game.wordsUsed = []
     
+    # Update rounds if provided
+    if max_round:
+        game.maxRound = max_round
+
+    # Update timer if provided (0 is valid for no-timer mode)
+    if clue_timer is not None:
+        game.clueTimer = clue_timer
+    
+    # Reset game state
+    game.wordsAvailable = []
+    game.impostorSchedule = []
+    
+    # Reset player points
+    for p in game.loPlayers:
+        p.points = 0
+        p.ready_to_start = False
+        p.ready_to_vote = False
+        p.has_voted = False
+        p.voted_for_id = None
+        p.votes = 0
+    
+    # Regenerate words and impostor schedule
+    from game_manager import createImpostorSchedule
+    from claude_service import generate_secret_word
+    
+    game.impostorSchedule = createImpostorSchedule(game.loPlayers, game.maxRound)
+    words = generate_secret_word(game.secretCategory, game.maxRound, game.wordsUsed)
+    game.fillAvailableWords(words)
+    
+    # Reset phase
+    game.phase = GamePhase.LOBBY
+    
     await manager.broadcast_to_game(game_id, {
-        "type": "host_choosing_settings",
-        "data": {}
+        "type": "new_game_started",
+        "data": {
+            "category": game.secretCategory,
+            "same_category": new_category is None
+        }
     })
 
 async def handle_quit_game(game_id: str, player_id: str):
