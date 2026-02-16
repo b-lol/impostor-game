@@ -972,7 +972,6 @@ class _GameScreenState extends State<GameScreen> {
   // ── Host Settings Screen ──
   // Shown when host taps "Continue Playing?" on game over screen.
   // Mirrors the layout from create_game_screen.dart.
-
   Widget _buildHostSettingsPhase() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24.0),
@@ -1074,7 +1073,7 @@ class _GameScreenState extends State<GameScreen> {
                 borderSide: const BorderSide(color: Color(0xFF08C8E9), width: 2),
               ),
               filled: false,
-              hintText: 'e.g., Formula 1 or Olympics',
+              hintText: 'e.g. Formula 1 or Olympics',
               helperText: 'Leave blank to keep current category.\nEx: Japan gives words like Tokyo, Anime, Samurai',
               helperMaxLines: 3,
               helperStyle: const TextStyle(color: Color(0xFFB0B0B0), fontSize: 12),
